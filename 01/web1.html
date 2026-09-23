@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>백화점 8F/9F 패밀리 & 라이프스타일 존 설문조사 센터</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Noto Sans KR', 'Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        luxury: {
+                            base: '#070A11',
+                            card: '#0F1523',
+                            cardHover: '#161F33',
+                            border: '#1E293B',
+                            goldLight: '#FCE7F3',
+                            gold: '#D97706',
+                            goldBright: '#F59E0B',
+                            goldGlow: '#FBBF24',
+                        }
+                    },
+                    backgroundImage: {
+                        'gold-gradient': 'linear-gradient(135deg, #FFF0D4 0%, #E7B056 50%, #B87C24 100%)',
+                        'gold-border': 'linear-gradient(135deg, rgba(245, 158, 11, 0.4) 0%, rgba(217, 119, 6, 0.1) 100%)',
+                        'dark-radial': 'radial-gradient(circle at 50% 0%, rgba(217, 119, 6, 0.12) 0%, rgba(7, 10, 17, 0) 70%)',
+                    },
+                    boxShadow: {
+                        'gold-glow': '0 0 25px -5px rgba(217, 119, 6, 0.25)',
+                        'gold-glow-lg': '0 0 40px -5px rgba(245, 158, 11, 0.35)',
+                        'card-elevate': '0 20px 40px -15px rgba(0, 0, 0, 0.6)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #070a11;
+            color: #f1f5f9;
+        }
+        
+        .gold-text-gradient {
+            background: linear-gradient(135deg, #FFE8B6 0%, #F59E0B 50%, #CA8A04 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-card {
+            background: rgba(15, 21, 35, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-card-hover {
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-card-hover:hover {
+            transform: translateY(-6px);
+            border-color: rgba(245, 158, 11, 0.4);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), 0 0 30px -5px rgba(217, 119, 6, 0.2);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #070a11;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d97706;
+        }
+
+        .shimmer-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                60deg,
+                transparent 30%,
+                rgba(255, 255, 255, 0.25) 50%,
+                transparent 70%
+            );
+            transform: rotate(30deg) translateX(-100%);
+            transition: transform 0.8s ease;
+        }
+        .shimmer-btn:hover::after {
+            transform: rotate(30deg) translateX(100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-luxury-base text-slate-100 flex flex-col justify-between selection:bg-amber-500 selection:text-slate-950 relative overflow-x-hidden">
+
+    <!-- Background Ambient Glows -->
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-dark-radial pointer-events-none z-0"></div>
+    <div class="fixed -top-40 -left-40 w-96 h-96 bg-amber-600/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+    <div class="fixed top-1/3 -right-40 w-96 h-96 bg-yellow-500/10 rounded-full blur-[140px] pointer-events-none z-0"></div>
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-40 border-b border-slate-800/80 bg-luxury-base/80 backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4 relative z-10">
+            
+            <div class="flex items-center space-x-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-700 p-[1px] shadow-gold-glow flex items-center justify-center">
+                    <div class="w-full h-full bg-luxury-base rounded-[15px] flex items-center justify-center text-amber-400">
+                        <i class="fa-solid fa-crown text-lg"></i>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                            RENEWAL PORTAL
+                        </span>
+                    </div>
+                    <h1 class="text-lg sm:text-xl font-extrabold text-white tracking-tight mt-0.5">
+                        백화점 8F · 9F 패밀리 & 라이프스타일 존
+                    </h1>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <a href="../index.html" 
+                   title="메인 홈 페이지로 이동"
+                   class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-xs font-semibold text-slate-200 border border-slate-700/80 hover:border-amber-500/50 transition-all duration-200 shadow-sm active:scale-95 group">
+                    <i class="fa-solid fa-house text-amber-400 group-hover:scale-110 transition-transform"></i>
+                    <span class="hidden sm:inline">메인 홈</span>
+                </a>
+                <div class="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs font-semibold text-amber-300">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span>설문 진행 중</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-grow w-full relative z-10 space-y-8">
+        
+        <!-- Hero & Info Banner -->
+        <section class="glass-card rounded-3xl p-6 sm:p-10 border border-slate-800/80 relative overflow-hidden shadow-2xl">
+            <div class="absolute -right-16 -top-16 w-80 h-80 bg-gradient-to-br from-amber-500/20 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+                <div class="lg:col-span-8 space-y-4">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold tracking-wide">
+                        <i class="fa-solid fa-sparkles text-amber-400"></i>
+                        <span>공간 리뉴얼 프로젝트 고객 수요조사</span>
+                    </div>
+
+                    <h2 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight tracking-tight">
+                        고객님의 소중한 목소리로 완성하는 <br class="hidden sm:inline">
+                        <span class="gold-text-gradient">프리미엄 패밀리 & 라이프스타일 공간</span>
+                    </h2>
+
+                    <p class="text-slate-300 text-sm sm:text-base leading-relaxed max-w-2xl font-light">
+                        백화점 8층과 9층의 매장 구성, 브랜드 입점, 휴게 및 CX 공간 개편과 신세계 센텀시티점 리뉴얼을 위한 고객 설문 모음입니다. 각 항목을 클릭하여 설문에 참여해 주시면 더 나은 서비스로 보답하겠습니다.
+                    </p>
+                </div>
+
+                <!-- Stats / Summary Strip -->
+                <div class="lg:col-span-4 grid grid-cols-2 gap-3 sm:gap-4 bg-slate-900/80 p-4 sm:p-5 rounded-2xl border border-slate-800/80">
+                    <div class="p-3.5 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                        <div class="text-xs text-slate-400 mb-1 flex items-center gap-1.5">
+                            <i class="fa-solid fa-clipboard-list text-amber-400"></i>
+                            <span>진행 중인 설문</span>
+                        </div>
+                        <div class="text-2xl font-black text-white"><span id="total-count" class="text-amber-400">5</span><span class="text-sm font-semibold text-slate-400 ml-1">건</span></div>
+                    </div>
+
+                    <div class="p-3.5 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                        <div class="text-xs text-slate-400 mb-1 flex items-center gap-1.5">
+                            <i class="fa-regular fa-clock text-amber-400"></i>
+                            <span>평균 소요시간</span>
+                        </div>
+                        <div class="text-2xl font-black text-white">3<span class="text-sm font-semibold text-slate-400 ml-1">분 이내</span></div>
+                    </div>
+
+                    <div class="col-span-2 p-3 bg-amber-500/10 rounded-xl border border-amber-500/20 text-xs text-amber-300/90 flex items-center gap-2">
+                        <i class="fa-solid fa-gift text-amber-400 text-base"></i>
+                        <span>설문 참여 고객 대상 리뉴얼 이벤트 우선 안내</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter & Search Controls -->
+            <div class="mt-8 pt-6 border-t border-slate-800/80 flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center">
+                <!-- Search Box -->
+                <div class="relative flex-grow max-w-md">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="search-input" placeholder="설문 제목, 태그, 키워드로 검색해보세요..." 
+                        class="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all text-sm shadow-inner">
+                </div>
+
+                <!-- Category Tabs -->
+                <div class="flex gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none" id="category-filters">
+                    <button data-filter="all" class="filter-btn active px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap bg-amber-500 text-slate-950 shadow-gold-glow transition-all">
+                        <i class="fa-solid fa-border-all mr-1.5"></i>전체보기
+                    </button>
+                    <button data-filter="사전조사" class="filter-btn px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 transition-all">
+                        사전 수요조사
+                    </button>
+                    <button data-filter="만족도" class="filter-btn px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 transition-all">
+                        만족도 조사
+                    </button>
+                    <button data-filter="센텀시티" class="filter-btn px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800 transition-all">
+                        센텀시티점
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Survey Cards Grid -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="cards-container">
+            
+            <!-- Card 1 -->
+            <div class="survey-card group glass-card glass-card-hover rounded-3xl p-6 flex flex-col justify-between border border-slate-800/80 relative"
+                 data-title="백화점 8F/9F 패밀리 & 라이프스타일 컬처존 이용 경험 및 만족도 조사"
+                 data-category="만족도"
+                 data-tags="만족도,컬처존,8F,9F,경험조사">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 진행중
+                        </span>
+                        <span class="text-xs text-slate-400 flex items-center gap-1 font-medium">
+                            <i class="fa-regular fa-clock text-amber-400/80"></i> 약 3분 소요
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">이용 경험 & 만족도</span>
+                        <h3 class="text-lg font-extrabold text-white group-hover:text-amber-300 transition-colors mt-2.5 leading-snug">
+                            백화점 8F/9F 패밀리 & 라이프스타일 컬처존 이용 경험 및 만족도 조사
+                        </h3>
+                    </div>
+
+                    <p class="text-slate-400 text-xs sm:text-sm mb-6 line-clamp-3 leading-relaxed font-light">
+                        기존 8층 및 9층 컬처존을 이용해보신 고객님들의 경험과 만족도를 파악하여 더 나은 문화 공간 및 편의 서비스를 제공하기 위한 조사입니다.
+                    </p>
+                </div>
+
+                <div>
+                    <!-- Tag Pills -->
+                    <div class="flex flex-wrap gap-1.5 mb-5">
+                        <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-400">#만족도</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-400">#컬처존</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-400">#8F/9F</span>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-800/80 flex items-center gap-2">
+                        <a href="https://forms.gle/dfrE2nHRrjLHnG4w6" target="_blank" rel="noopener noreferrer" 
+                           class="shimmer-btn flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold text-xs tracking-wide transition-all shadow-gold-glow">
+                            <span>설문 참여하기</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
+                        <button onclick="openQrModal('백화점 8F/9F 패밀리 & 라이프스타일 컬처존 이용 경험 및 만족도 조사', 'https://forms.gle/dfrE2nHRrjLHnG4w6')" title="QR코드 스캔"
+                                class="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-amber-500/50 transition">
+                            <i class="fa-solid fa-qrcode text-sm"></i>
+                        </button>
+                        <button onclick="copyLink('https://forms.gle/dfrE2nHRrjLHnG4w6')" title="링크 복사"
+                                class="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-amber-500/50 transition">
+                            <i class="fa-regular fa-copy text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="survey-card group glass-card glass-card-hover rounded-3xl p-6 flex flex-col justify-between border border-slate-800/80 relative"
+                 data-title="[사전 수요조사] 8-9F 패밀리 & 라이프스타일 공간 리뉴얼 고객 조사"
+                 data-category="사전조사"
+                 data-tags="사전조사,공간리뉴얼,8F,9F,패밀리">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 진행중
+                        </span>
+                        <span class="text-xs text-slate-400 flex items-center gap-1 font-medium">
+                            <i class="fa-regular fa-clock text-amber-400/80"></i> 약 3분 소요
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">공간 리뉴얼 사전조사</span>
+                        <h3 class="text-lg font-extrabold text-white group-hover:text-amber-300 transition-colors mt-2.5 leading-snug">
+                            [사전 수요조사] 8-9F 패밀리 & 라이프스타일 공간 리뉴얼 고객 조사
+                        </h3>
+                    </div>
+
+                    <p class="text-slate-400 text-xs sm:text-sm mb-6 line-clamp-3 leading-relaxed font-light">
+                        온 가족이 함께 즐길 수 있는 차별화된 패밀리 & 라이프스타일 공간 구성을 위해 고객님들의 니즈와 선호도를 사전에 수렴합니다.
+                    </p>
+                </div>
+
+                <div>
+                    <!-- Tag Pills -->
+                    <div class="flex flex-wrap gap-1.5 mb-5">
+                        <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-400">#사전수요조사</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-400">#공간리뉴얼</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-400">#패밀리존</span>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-800/80 flex items-center gap-2">
+                        <a href="https://docs.google.com/forms/d/e/1FAIpQLSdehs0Xii5rgyIoRenn43edNm1_HJk1fPFWPb5ykcSHWGp-dQ/viewform" target="_blank" rel="noopener noreferrer" 
+                           class="shimmer-btn flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold text-xs tracking-wide transition-all shadow-gold-glow">
+                            <span>설문 참여하기</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
+                        <button onclick="openQrModal('[사전 수요조사] 8-9F 패밀리 & 라이프스타일 공간 리뉴얼 고객 조사', 'https://docs.google.com/forms/d/e/1FAIpQLSdehs0Xii5rgyIoRenn43edNm1_HJk1fPFWPb5ykcSHWGp-dQ/viewform')" title="QR코드 스캔"
+                                class="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-amber-500/50 transition">
+                            <i class="fa-solid fa-qrcode text-sm"></i>
+                        </button>
+                        <button onclick="copyLink('https://docs.google.com/forms/d/e/1FAIpQLSdehs0Xii5rgyIoRenn43edNm1_HJk1fPFWPb5ykcSHWGp-dQ/viewform')" title="링크 복사"
+                                class="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-amber-500/50 transition">
+                            <i class="fa-regular fa-copy text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="survey-card group glass-card glass-card-hover rounded-3xl p-6 flex flex-col justify-between border border-slate-800/80 relative"
+                 data-title="[사전 수요조사] 백화점 8F·9F 패밀리 & 라이프스타일 존 리뉴얼 고객 설문"
+                 data-category="사전조사"
+                 data-tags="사전조사,MD기획,8F,9F,입점브랜드">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 진행중
+                        </span>
+                        <span class="text-xs text-slate-400 flex items-center gap-1 font-medium">
+                            <i class="fa-regular fa-clock text-amber-400/80"></i> 약 3분 소요
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">MD & 브랜드 기획</span>
+                        <h3 class="text-lg font-extrabold text-white group-hover:text-amber-300 transition-colors mt-2.5 leading-snug">
+                            [사전 수요조사] 백화점 8F·9F 패밀리 & 라이프스타일 존 리뉴얼 고객 설문
+                        </h3>
+                    </div>
+
+                    <p class="text-slate-400 text-xs sm:text-sm mb-6 line-clamp-3 leading-relaxed font-light">
+                        8F·9F 개편 시 선호하시는 입점 브랜드 카테고리, 휴게 및 편의 공간 요구사항을 종합하여 새로운 라이프스타일 공간을 만듭니다.
+                    </p>
+                </div>
+
+                <div>
+                    <!-- Tag Pills -->
+                    <div class="flex flex-wrap gap-1.5 mb-5">
+                        <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-400">#MD기획</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-400">#입점브랜드</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-400">#휴게공간</span>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-800/80 flex items-center gap-2">
+                        <a href="https://docs.google.com/forms/d/1p-2DYItur2IltwtX-JAsAHvo7xHw3tp-GvBLcj11GIo/edit" target="_blank" rel="noopener noreferrer" 
+                           class="shimmer-btn flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold text-xs tracking-wide transition-all shadow-gold-glow">
+                            <span>설문 참여하기</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
+                        <button onclick="openQrModal('[사전 수요조사] 백화점 8F·9F 패밀리 & 라이프스타일 존 리뉴얼 고객 설문', 'https://docs.google.com/forms/d/1p-2DYItur2IltwtX-JAsAHvo7xHw3tp-GvBLcj11GIo/edit')" title="QR코드 스캔"
+                                class="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-amber-500/50 transition">
+                            <i class="fa-solid fa-qrcode text-sm"></i>
+                        </button>
+                        <button onclick="copyLink('https://docs.google.com/forms/d/1p-2DYItur2IltwtX-JAsAHvo7xHw3tp-GvBLcj11GIo/edit')" title="링크 복사"
+                                class="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-amber-500/50 transition">
+                            <i class="fa-regular fa-copy text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="survey-card group glass-card glass-card-hover rounded-3xl p-6 flex flex-col justify-between border border-slate-800/80 relative"
+                 data-title="[사전 수요 조사] 8F/9F 공존형 리테일 CX 공간 사전 설문"
+                 data-category="사전조사"
+                 data-tags="사전조사,CX공간,공존형리테일,고객경험">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 진행중
+                        </span>
+                        <span class="text-xs text-slate-400 flex items-center gap-1 font-medium">
+                            <i class="fa-regular fa-clock text-amber-400/80"></i> 약 2분 소요
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">CX 고객경험 혁신</span>
+                        <h3 class="text-lg font-extrabold text-white group-hover:text-amber-300 transition-colors mt-2.5 leading-snug">
+                            [사전 수요 조사] 8F/9F 공존형 리테일 CX 공간 사전 설문
+                        </h3>
+                    </div>
+
+                    <p class="text-slate-400 text-xs sm:text-sm mb-6 line-clamp-3 leading-relaxed font-light">
+                        쇼핑을 넘어 체험과 휴식, 문화가 결합된 '공존형 리테일 CX(Customer Experience) 공간' 조성을 위한 아이디어 및 선호도 설문입니다.
+                    </p>
+                </div>
+
+                <div>
+                    <!-- Tag Pills -->
+                    <div class="flex flex-wrap gap-1.5 mb-5">
+                        <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-400">#CX공간</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-400">#공존형리테일</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-400">#체험형매장</span>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-800/80 flex items-center gap-2">
+                        <a href="https://docs.google.com/forms/d/1wpQkqW23WvPe82IaprVbPjzlDRHRlPWTfDYRa8Ly2AA/edit" target="_blank" rel="noopener noreferrer" 
+                           class="shimmer-btn flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold text-xs tracking-wide transition-all shadow-gold-glow">
+                            <span>설문 참여하기</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
+                        <button onclick="openQrModal('[사전 수요 조사] 8F/9F 공존형 리테일 CX 공간 사전 설문', 'https://docs.google.com/forms/d/1wpQkqW23WvPe82IaprVbPjzlDRHRlPWTfDYRa8Ly2AA/edit')" title="QR코드 스캔"
+                                class="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-amber-500/50 transition">
+                            <i class="fa-solid fa-qrcode text-sm"></i>
+                        </button>
+                        <button onclick="copyLink('https://docs.google.com/forms/d/1wpQkqW23WvPe82IaprVbPjzlDRHRlPWTfDYRa8Ly2AA/edit')" title="링크 복사"
+                                class="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-amber-500/50 transition">
+                            <i class="fa-regular fa-copy text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="survey-card group glass-card glass-card-hover rounded-3xl p-6 flex flex-col justify-between border border-slate-800/80 relative"
+                 data-title="[신세계 센텀시티점] 패밀리 리테일 존 리뉴얼 사전 수요조사"
+                 data-category="센텀시티"
+                 data-tags="신세계,센텀시티점,사전조사,패밀리리테일">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 진행중
+                        </span>
+                        <span class="text-xs text-slate-400 flex items-center gap-1 font-medium">
+                            <i class="fa-regular fa-clock text-amber-400/80"></i> 약 3분 소요
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">신세계 센텀시티점</span>
+                        <h3 class="text-lg font-extrabold text-white group-hover:text-amber-300 transition-colors mt-2.5 leading-snug">
+                            [신세계 센텀시티점] 패밀리 리테일 존 리뉴얼 사전 수요조사
+                        </h3>
+                    </div>
+
+                    <p class="text-slate-400 text-xs sm:text-sm mb-6 line-clamp-3 leading-relaxed font-light">
+                        신세계 센텀시티점 8F/9F 패밀리 리테일 존 리뉴얼 프로젝트를 위한 센텀시티 방문 고객 맞춤형 사전 수요조사입니다.
+                    </p>
+                </div>
+
+                <div>
+                    <!-- Tag Pills -->
+                    <div class="flex flex-wrap gap-1.5 mb-5">
+                        <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-400">#센텀시티점</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-400">#신세계</span>
+                        <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-400">#패밀리존</span>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-800/80 flex items-center gap-2">
+                        <a href="https://docs.google.com/forms/d/1OEQKwzdT4OwcCikGDTu1C8GplBfNJ-HVUjKdAGe1kU0/edit#responses4" target="_blank" rel="noopener noreferrer" 
+                           class="shimmer-btn flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold text-xs tracking-wide transition-all shadow-gold-glow">
+                            <span>설문 참여하기</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                        </a>
+                        <button onclick="openQrModal('[신세계 센텀시티점] 패밀리 리테일 존 리뉴얼 사전 수요조사', 'https://docs.google.com/forms/d/1OEQKwzdT4OwcCikGDTu1C8GplBfNJ-HVUjKdAGe1kU0/edit#responses4')" title="QR코드 스캔"
+                                class="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-amber-500/50 transition">
+                            <i class="fa-solid fa-qrcode text-sm"></i>
+                        </button>
+                        <button onclick="copyLink('https://docs.google.com/forms/d/1OEQKwzdT4OwcCikGDTu1C8GplBfNJ-HVUjKdAGe1kU0/edit#responses4')" title="링크 복사"
+                                class="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 hover:border-amber-500/50 transition">
+                            <i class="fa-regular fa-copy text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Empty Search State -->
+        <div id="no-results" class="hidden text-center py-20 glass-card rounded-3xl border border-slate-800/80">
+            <div class="w-20 h-20 bg-slate-900 text-slate-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl border border-slate-800">
+                <i class="fa-solid fa-magnifying-glass-slash"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-200 mb-2">검색 결과가 없습니다</h3>
+            <p class="text-slate-400 text-sm max-w-sm mx-auto font-light">입력하신 검색어 또는 선택한 카테고리에 해당하는 설문 항목을 찾을 수 없습니다.</p>
+        </div>
+    </main>
+
+    <!-- QR Code Dynamic Modal -->
+    <div id="qr-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+        <div class="glass-card border border-slate-800/90 rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center relative shadow-2xl transform scale-95 transition-transform duration-300" id="qr-modal-content">
+            <button onclick="closeQrModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-800/80 text-slate-400 hover:text-white flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-500/20">
+                <i class="fa-solid fa-qrcode text-2xl"></i>
+            </div>
+            <h4 id="qr-title" class="text-base font-extrabold text-white mb-4 line-clamp-2 leading-snug px-2">설문조사 QR 코드</h4>
+            
+            <div class="bg-white p-4 rounded-2xl inline-block mb-4 shadow-xl border border-slate-200">
+                <img id="qr-image" src="" alt="설문 QR 코드" class="w-48 h-48 object-contain">
+            </div>
+            <p class="text-xs text-slate-400 mb-6 font-light">모바일 카메라 앱으로 QR 코드를 스캔하시면 해당 설문지로 즉시 연결됩니다.</p>
+            <button onclick="closeQrModal()" class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 transition">
+                닫기
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-8 right-8 transform translate-y-24 opacity-0 transition-all duration-300 bg-emerald-500 text-slate-950 px-6 py-3.5 rounded-2xl shadow-gold-glow font-bold text-sm flex items-center gap-3 z-50 pointer-events-none">
+        <i class="fa-solid fa-circle-check text-xl"></i>
+        <span>설문 링크가 클립보드에 복사되었습니다.</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 bg-luxury-base/90 py-10 text-center text-slate-500 text-xs relative z-10 mt-16">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex items-center justify-center gap-2 mb-3 text-slate-400 font-medium">
+                <i class="fa-solid fa-store text-amber-500"></i>
+                <span>백화점 8F/9F 패밀리 & 라이프스타일 존 리뉴얼 프로젝트</span>
+            </div>
+            <p>© 2026 Department Store Renewal Customer Insights Portal. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Script Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('search-input');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const cards = document.querySelectorAll('.survey-card');
+            const noResults = document.getElementById('no-results');
+            const totalCount = document.getElementById('total-count');
+
+            let activeFilter = 'all';
+
+            function filterCards() {
+                const query = searchInput.value.toLowerCase().trim();
+                let visibleCount = 0;
+
+                cards.forEach(card => {
+                    const title = card.getAttribute('data-title').toLowerCase();
+                    const category = card.getAttribute('data-category');
+                    const tags = card.getAttribute('data-tags').toLowerCase();
+
+                    const matchesCategory = activeFilter === 'all' || category === activeFilter || tags.includes(activeFilter.toLowerCase());
+                    const matchesSearch = title.includes(query) || tags.includes(query);
+
+                    if (matchesCategory && matchesSearch) {
+                        card.classList.remove('hidden');
+                        visibleCount++;
+                    } else {
+                        card.classList.add('hidden');
+                    }
+                });
+
+                totalCount.textContent = visibleCount;
+
+                if (visibleCount === 0) {
+                    noResults.classList.remove('hidden');
+                } else {
+                    noResults.classList.add('hidden');
+                }
+            }
+
+            // Search Filter Listener
+            searchInput.addEventListener('input', filterCards);
+
+            // Category Filter Listener
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => {
+                        b.classList.remove('bg-amber-500', 'text-slate-950', 'shadow-gold-glow', 'active');
+                        b.classList.add('bg-slate-900/90', 'text-slate-300');
+                    });
+                    btn.classList.remove('bg-slate-900/90', 'text-slate-300');
+                    btn.classList.add('bg-amber-500', 'text-slate-950', 'shadow-gold-glow', 'active');
+
+                    activeFilter = btn.getAttribute('data-filter');
+                    filterCards();
+                });
+            });
+        });
+
+        function copyLink(url) {
+            const tempInput = document.createElement('input');
+            tempInput.value = url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast();
+            } catch (err) {
+                console.error('복사 실패:', err);
+            } finally {
+                document.body.removeChild(tempInput);
+            }
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 2500);
+        }
+
+        function openQrModal(title, url) {
+            const modal = document.getElementById('qr-modal');
+            const modalContent = document.getElementById('qr-modal-content');
+            const qrTitle = document.getElementById('qr-title');
+            const qrImage = document.getElementById('qr-image');
+
+            qrTitle.textContent = title;
+            qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(url)}`;
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('opacity-100');
+            modalContent.classList.remove('scale-95');
+            modalContent.classList.add('scale-100');
+        }
+
+        function closeQrModal() {
+            const modal = document.getElementById('qr-modal');
+            const modalContent = document.getElementById('qr-modal-content');
+
+            modal.classList.remove('opacity-100');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+        }
+    </script>
+</body>
+</html>
