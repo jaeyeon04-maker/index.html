@@ -1033,11 +1033,9 @@
     </div>
   </header>
 
-  <!-- =========================================================
-       HERO
-  ========================================================== -->
   <main>
 
+    <!-- HERO -->
     <section class="hero" id="home">
       <div class="container">
 
@@ -1126,9 +1124,7 @@
       </div>
     </section>
 
-    <!-- =========================================================
-         PROBLEM
-    ========================================================== -->
+    <!-- PROBLEM -->
     <section id="problem" class="section section-soft">
       <div class="container">
 
@@ -1242,7 +1238,7 @@
             </div>
 
             <div style="margin-top:20px; padding:12px; background:rgba(239, 68, 68, 0.1); border-radius:12px; border:1px solid rgba(239, 68, 68, 0.2); font-size:12px; color:#fca5a5;">
-              💡 <strong>해결책:</strong> 행동 직전 1초, 위험도(Risk Score) 수치에 따라 정밀하게 브레이크를 거는 <strong>다단계 인터셉트</strong>가 필요합니다.
+              💡 <strong>해결책:</strong> 행동 직전 판단 순간에 위험도(Risk Score)에 따라 개입 강도를 조절하는 다단계 인터셉트가 필요합니다.
             </div>
 
           </div>
@@ -1253,7 +1249,7 @@
     </section>
 
     <!-- =========================================================
-         MECHANISM
+         MECHANISM (SINGLE PRESERVED SECTION)
     ========================================================== -->
     <section id="mechanism" class="section">
       <div class="container">
@@ -1283,8 +1279,8 @@
 
             <div class="flow-card">
               <div class="flow-number">2</div>
-              <strong>On-Device 분석</strong>
-              <span>개인정보 유출 없이 기기 내 1차 점검</span>
+              <strong>위험 신호 분석</strong>
+              <span>통화·앱·거래 등 복수 위험 신호를 종합적으로 점검</span>
             </div>
 
             <div class="flow-card judgment">
@@ -1302,7 +1298,7 @@
             <div class="flow-card">
               <div class="flow-number">5</div>
               <strong>차등 개입 Trigger</strong>
-              <span>주의, 강제 일시정지, 송금 차단</span>
+              <span>주의, 재확인, 일시 중단, 고위험 시 거래 제한</span>
             </div>
 
             <div class="flow-card">
@@ -1331,16 +1327,20 @@
 
           <div class="risk-card">
             <span class="risk-tag high-tag">Tier 3 : High Risk (60~84점)</span>
-            <h4>강제 개입 (High Intercept)</h4>
-            <p>원격앱+통화 중 고액 이체. 10초간 송금버튼 잠금, 피싱 의심 퀴즈 통과 후 이체 진행 허용.</p>
+            <h4>행동 일시 중단 (High Intercept)</h4>
+            <p>복수의 위험 신호가 중첩된 경우 행동을 일시 중단하고 상대방·수취인·거래 목적 등을 다시 확인하도록 합니다.</p>
           </div>
 
           <div class="risk-card">
             <span class="risk-tag critical-tag">Tier 4 : Critical (85~100점)</span>
-            <h4>즉시 차단 (Critical Halt)</h4>
-            <p>악성 앱 감지 및 확실한 피싱 이력. 거래 즉시 중단, 보호자/지정 연락처 비상 알림 발송.</p>
+            <h4>고위험 거래 제한 (Critical)</h4>
+            <p>고위험 신호가 지속되는 경우 거래 제한 및 신고·공식 확인 절차와의 연계를 검토합니다.</p>
           </div>
 
+        </div>
+
+        <div class="disclaimer">
+          ※ Risk Score의 가중치와 단계별 임계값은 서비스 작동 원리를 설명하기 위한 시연용 예시이며, 실제 적용 시 기관별 데이터·정책·사용자 테스트 및 오탐·미탐 검증을 통해 조정될 수 있습니다.
         </div>
 
       </div>
@@ -1736,11 +1736,11 @@
                 <td class="pb-cell">AI Risk Score 연동 다단계 차등 개입</td>
               </tr>
               <tr>
-                <td>가스라이팅 억제력</td>
+                <td>재판단 기회 제공</td>
                 <td>낮음 (사용자가 사기 인지 못함)</td>
                 <td>보통 (경고 무시 후 송금 가능)</td>
                 <td>보통 (지연 해제 대기시 유효)</td>
-                <td class="pb-cell">매우 높음 (10초 강제 정지 + 확인 퀴즈)</td>
+                <td class="pb-cell">높음 (행동 일시 중단 + 추가 확인)</td>
               </tr>
               <tr>
                 <td>정상 거래 불편도</td>
@@ -1764,7 +1764,7 @@
     </section>
 
     <!-- =========================================================
-         EFFECTS
+         EFFECTS (EXPECTED IMPACT)
     ========================================================== -->
     <section id="effects" class="section section-soft">
       <div class="container">
@@ -1785,25 +1785,25 @@
 
           <div class="card">
             <div class="effect-number">01</div>
-            <h3>피해 골든타임 사수</h3>
+            <h3>행동 실행 전 재판단 기회 확보</h3>
             <p>
-              보이스피싱 범죄자가 송금을 유도하는 마지막 1초에 브레이크를 걸어 실질적인 자금 유출 피해를 0으로 수렴시킵니다.
+              송금·인증 등 최종 행동이 완료되기 직전에 개입하여 사용자가 거래 상대방과 목적을 다시 확인하고 안전 여부를 재판단할 시간을 확보합니다.
             </p>
           </div>
 
           <div class="card">
             <div class="effect-number">02</div>
-            <h3>심리적 가스라이팅 해제</h3>
+            <h3>심리적 압박 상황에서 재확인 지원</h3>
             <p>
-              10초 간의 강제 일시정지 및 상황 확인 질문을 통해 범죄자의 압박 통화로부터 사용자의 이성적 판단력을 환원합니다.
+              행동 흐름을 일시적으로 중단하고 확인 질문을 제공하여 사용자가 긴급한 압박 상황에서도 안전 여부를 다시 판단할 수 있도록 지원합니다.
             </p>
           </div>
 
           <div class="card">
             <div class="effect-number">03</div>
-            <h3>금융 피로도 최소화</h3>
+            <h3>정상 거래 불편 최소화</h3>
             <p>
-              위험하지 않은 95% 이상의 정상 거래에는 개입하지 않는 스마트 차등 알고리즘으로 서비스 만족도를 보존합니다.
+              위험 신호의 수준과 중첩 정도에 따라 개입 강도를 조절하여 정상 거래에는 불필요한 절차를 최소화합니다.
             </p>
           </div>
 
@@ -1834,7 +1834,7 @@
 
           <div class="structure-box">
             <strong style="color:#67e8f9;">[Layer 1] 통화 / OS API</strong>
-            <span>통화 상태 감지, 원격앱 모니터링, 악성 URL 검출 (On-Device)</span>
+            <span>통화 상태·원격앱·URL 등 활용 가능한 위험 신호 연계</span>
           </div>
 
           <div class="structure-box structure-center">
@@ -1849,7 +1849,7 @@
 
           <div class="structure-box">
             <strong style="color:#fcd34d;">[Layer 4] 비상 에스컬레이션</strong>
-            <span>보호자 알림, 통신사 비상 차단 및 경찰 연계 모듈</span>
+            <span>고위험 거래 제한 및 기존 신고·공식 확인 절차 연계</span>
           </div>
 
         </div>
@@ -1866,7 +1866,7 @@
         <div class="final-message">
           <h2>
             안전한 금융 세상을 만드는<br />
-            <span class="hero-gradient">마지막 1초의 브레이크</span>
+            <span class="hero-gradient">행동 직전의 브레이크</span>
           </h2>
           <p style="margin-bottom:28px;">
             보이스피싱은 더 이상 개인의 주의력 문제에만 맡길 수 없습니다.
