@@ -1,1288 +1,2033 @@
 <!DOCTYPE html>
-<html lang="ko" class="dark scroll-smooth">
+<html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHISHING BRAKE - AI Risk Score 기반 다단계 보이스피싱 인터셉트 시스템</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0fdf4',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                        },
-                        accent: {
-                            red: '#ef4444',
-                            amber: '#f59e0b',
-                            cyan: '#06b6d4',
-                            indigo: '#6366f1',
-                        },
-                        dark: {
-                            bg: '#0b0f17',
-                            card: '#131b2e',
-                            border: '#1e293b',
-                            hover: '#1e293b'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
-                    },
-                    boxShadow: {
-                        'neon-red': '0 0 25px -5px rgba(239, 68, 68, 0.5)',
-                        'neon-cyan': '0 0 25px -5px rgba(6, 182, 212, 0.4)',
-                        'neon-green': '0 0 25px -5px rgba(34, 197, 94, 0.4)',
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Noto Sans KR', 'Inter', sans-serif; background-color: #0b0f17; color: #f3f4f6; }
-        .grid-bg {
-            background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-            background-size: 24px 24px;
-        }
-        .glow-effect {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(100px);
-            opacity: 0.25;
-            pointer-events: none;
-        }
-        /* Soundwave Equalizer Animation */
-        .eq-bar {
-            width: 3px;
-            background-color: #ef4444;
-            animation: eqBounce 1s infinite ease-in-out alternate;
-        }
-        .eq-bar:nth-child(1) { height: 16px; animation-delay: 0.1s; }
-        .eq-bar:nth-child(2) { height: 24px; animation-delay: 0.3s; }
-        .eq-bar:nth-child(3) { height: 10px; animation-delay: 0.2s; }
-        .eq-bar:nth-child(4) { height: 28px; animation-delay: 0.4s; }
-        .eq-bar:nth-child(5) { height: 14px; animation-delay: 0.15s; }
-        @keyframes eqBounce {
-            0% { transform: scaleY(0.3); }
-            100% { transform: scaleY(1.1); }
-        }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0b0f17; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #334155; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>PHISHING BRAKE | AI Risk Score 기반 다단계 보이스피싱 인터셉트 시스템</title>
+
+  <meta
+    name="description"
+    content="PHISHING BRAKE - 보이스피싱 위험 신호를 종합해 위험도를 판단하고, 위험 수준에 따라 사용자의 행동 직전에 차등 개입하는 보이스피싱 대응 아이디어."
+  />
+
+  <style>
+    /* =========================================================
+       1. BASIC RESET & CORE THEME
+    ========================================================= */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family:
+        "Pretendard",
+        "Noto Sans KR",
+        "Apple SD Gothic Neo",
+        "Malgun Gothic",
+        Arial,
+        sans-serif;
+
+      background:
+        radial-gradient(circle at 15% 10%, rgba(37, 99, 235, 0.12), transparent 28%),
+        radial-gradient(circle at 90% 25%, rgba(239, 68, 68, 0.10), transparent 25%),
+        radial-gradient(circle at 40% 90%, rgba(16, 185, 129, 0.08), transparent 25%),
+        #080d17;
+
+      color: #f8fafc;
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    button,
+    input {
+      font-family: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .container {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .section {
+      padding: 100px 0;
+    }
+
+    .section-soft {
+      background: rgba(15, 23, 42, 0.58);
+      border-top: 1px solid rgba(148, 163, 184, 0.12);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    /* =========================================================
+       2. TYPOGRAPHY & UTILITIES
+    ========================================================= */
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      border: 1px solid rgba(248, 113, 113, 0.35);
+      background: rgba(239, 68, 68, 0.08);
+      color: #fca5a5;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      margin-bottom: 18px;
+    }
+
+    .section-heading {
+      max-width: 820px;
+      margin: 0 auto 48px;
+      text-align: center;
+    }
+
+    .section-heading h2 {
+      font-size: clamp(28px, 4vw, 42px);
+      line-height: 1.25;
+      margin-bottom: 15px;
+      letter-spacing: -0.04em;
+    }
+
+    .section-heading p {
+      color: #94a3b8;
+      font-size: 16px;
+    }
+
+    .highlight-red { color: #fb7185; }
+    .highlight-blue { color: #67e8f9; }
+    .highlight-green { color: #6ee7b7; }
+    .highlight-amber { color: #fcd34d; }
+    .muted { color: #94a3b8; }
+
+    /* =========================================================
+       3. HEADER & NAVIGATION
+    ========================================================= */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      background: rgba(8, 13, 23, 0.82);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+    }
+
+    .header-inner {
+      min-height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 25px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.28), rgba(99, 102, 241, 0.28));
+      border: 1px solid rgba(248, 113, 113, 0.45);
+      font-size: 22px;
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+    }
+
+    .brand-sub {
+      font-size: 10px;
+      color: #94a3b8;
+    }
+
+    nav {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      font-size: 13px;
+      color: #cbd5e1;
+      font-weight: 700;
+    }
+
+    nav a:hover {
+      color: #67e8f9;
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: transparent;
+      border: 0;
+      color: white;
+      font-size: 25px;
+    }
+
+    .mobile-menu {
+      display: none;
+      padding: 14px 0 20px;
+    }
+
+    .mobile-menu a {
+      display: block;
+      padding: 10px 0;
+      color: #cbd5e1;
+      font-size: 14px;
+      font-weight: 700;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+    }
+
+    /* =========================================================
+       4. HERO SECTION & STATS
+    ========================================================= */
+    .hero {
+      min-height: 720px;
+      display: flex;
+      align-items: center;
+      padding: 90px 0 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 520px;
+      height: 520px;
+      left: 50%;
+      top: 0;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(239, 68, 68, 0.11), transparent 65%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      max-width: 950px;
+      margin: 0 auto;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero h1 {
+      font-size: clamp(38px, 6.5vw, 68px);
+      line-height: 1.15;
+      letter-spacing: -0.05em;
+      font-weight: 950;
+      margin-bottom: 28px;
+    }
+
+    .hero-gradient {
+      background: linear-gradient(90deg, #fb7185, #fbbf24, #67e8f9);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-desc {
+      max-width: 830px;
+      margin: 0 auto;
+      color: #cbd5e1;
+      font-size: clamp(16px, 2vw, 20px);
+      line-height: 1.85;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 34px;
+    }
+
+    .primary-btn, .secondary-btn {
+      min-height: 52px;
+      padding: 0 26px;
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 900;
+      transition: all 0.25s ease;
+    }
+
+    .primary-btn {
+      color: white;
+      background: linear-gradient(90deg, #dc2626, #4f46e5);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 10px 30px rgba(220, 38, 38, 0.28);
+    }
+
+    .secondary-btn {
+      color: #e2e8f0;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    .primary-btn:hover, .secondary-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(99, 102, 241, 0.35);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-top: 64px;
+    }
+
+    .stat-card {
+      background: rgba(15, 23, 42, 0.82);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      border-radius: 20px;
+      padding: 24px;
+      text-align: left;
+    }
+
+    .stat-label {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: clamp(26px, 4vw, 35px);
+      font-weight: 950;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .stat-note {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    /* =========================================================
+       5. CARDS & PROBLEM SECTION
+    ========================================================= */
+    .cards-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 22px;
+    }
+
+    .cards-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .card {
+      border-radius: 22px;
+      padding: 28px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+    }
+
+    .card h3 {
+      font-size: 19px;
+      margin-bottom: 11px;
+      letter-spacing: -0.02em;
+    }
+
+    .card p {
+      font-size: 14px;
+      color: #aebbd0;
+    }
+
+    .problem-box {
+      padding: 32px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, rgba(127, 29, 29, 0.22), rgba(15, 23, 42, 0.8));
+      border: 1px solid rgba(248, 113, 113, 0.18);
+    }
+
+    .problem-title {
+      color: #fca5a5;
+      font-weight: 900;
+      margin-bottom: 11px;
+    }
+
+    .comparison-mini {
+      margin-top: 22px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .mini-box {
+      background: rgba(2, 6, 23, 0.52);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      padding: 17px;
+      border-radius: 14px;
+    }
+
+    .mini-box strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+
+    .mini-box span {
+      color: #94a3b8;
+      font-size: 12px;
+    }
+
+    /* =========================================================
+       6. BARS & ANALYTICS VISUALS
+    ========================================================= */
+    .bar-group {
+      margin-top: 24px;
+    }
+
+    .bar-item {
+      margin-bottom: 17px;
+    }
+
+    .bar-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 8px;
+      background: #111827;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 1s ease-in-out;
+    }
+
+    .bar-red { background: #ef4444; }
+    .bar-amber { background: #f59e0b; }
+    .bar-indigo { background: #6366f1; }
+
+    /* =========================================================
+       7. FLOW / CORE MECHANISM
+    ========================================================= */
+    .flow-wrap {
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .flow {
+      min-width: 920px;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+    }
+
+    .flow-card {
+      padding: 20px 12px;
+      text-align: center;
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      background: #101827;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .flow-number {
+      width: 32px;
+      height: 32px;
+      margin: 0 auto 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: #1e293b;
+      font-size: 12px;
+      font-weight: 900;
+      color: #67e8f9;
+    }
+
+    .flow-card strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+
+    .flow-card span {
+      color: #94a3b8;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .flow-card.judgment {
+      border: 2px solid #ef4444;
+      background: linear-gradient(180deg, rgba(127, 29, 29, 0.54), rgba(15, 23, 42, 0.85));
+      box-shadow: 0 0 35px rgba(239, 68, 68, 0.18);
+    }
+
+    .flow-card.judgment .flow-number {
+      background: #ef4444;
+      color: white;
+    }
+
+    /* =========================================================
+       8. RISK TIERS & CARD STYLING
+    ========================================================= */
+    .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-top: 36px;
+    }
+
+    .risk-card {
+      padding: 22px;
+      border-radius: 18px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .risk-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .risk-tag {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 10px;
+      font-weight: 900;
+      margin-bottom: 14px;
+    }
+
+    .risk-card h4 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+
+    .risk-card p {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .normal-tag { color: #6ee7b7; background: rgba(16, 185, 129, 0.09); border: 1px solid rgba(16, 185, 129, 0.2); }
+    .caution-tag { color: #fcd34d; background: rgba(245, 158, 11, 0.09); border: 1px solid rgba(245, 158, 11, 0.2); }
+    .high-tag { color: #fdba74; background: rgba(249, 115, 22, 0.09); border: 1px solid rgba(249, 115, 22, 0.2); }
+    .critical-tag { color: #fca5a5; background: rgba(239, 68, 68, 0.09); border: 1px solid rgba(239, 68, 68, 0.2); }
+
+    /* STAGE BADGES FOR PHONE INDICATOR */
+    .stage-badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      transition: all 0.3s ease;
+    }
+    .stage-badge.step-0 { background: rgba(16, 185, 129, 0.12); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .stage-badge.step-1 { background: rgba(59, 130, 246, 0.12); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .stage-badge.step-2 { background: rgba(245, 158, 11, 0.12); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .stage-badge.step-3 { background: rgba(249, 115, 22, 0.15); color: #fdba74; border: 1px solid rgba(249, 115, 22, 0.4); }
+    .stage-badge.step-4 { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+    .stage-badge.step-5 { background: rgba(168, 85, 247, 0.15); color: #e9d5ff; border: 1px solid rgba(168, 85, 247, 0.4); }
+
+    /* =========================================================
+       9. SIMULATOR INTERACTION AREA
+    ========================================================= */
+    .demo-note {
+      max-width: 900px;
+      margin: -25px auto 40px;
+      padding: 15px 18px;
+      background: rgba(245, 158, 11, 0.07);
+      border: 1px solid rgba(245, 158, 11, 0.18);
+      border-radius: 14px;
+      color: #cbd5e1;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .simulator-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 32px;
+      align-items: start;
+    }
+
+    .sim-panel {
+      padding: 28px;
+      border-radius: 24px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+    }
+
+    .sim-panel h3 {
+      margin-bottom: 22px;
+      font-size: 18px;
+    }
+
+    .risk-option {
+      display: flex;
+      gap: 14px;
+      padding: 15px;
+      margin-bottom: 11px;
+      border: 1px solid rgba(148, 163, 184, 0.13);
+      background: rgba(2, 6, 23, 0.38);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      align-items: flex-start;
+    }
+
+    .risk-option:hover {
+      border-color: rgba(103, 232, 249, 0.35);
+      background: rgba(2, 6, 23, 0.6);
+    }
+
+    .risk-option input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: #ef4444;
+      margin-top: 2px;
+      cursor: pointer;
+    }
+
+    .risk-option-title {
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .risk-option-desc {
+      color: #94a3b8;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .score-wrap {
+      margin-top: 25px;
+      padding-top: 22px;
+      border-top: 1px solid rgba(148, 163, 184, 0.13);
+    }
+
+    .score-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .score-head span:first-child {
+      color: #cbd5e1;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    #scoreText {
+      font-size: 22px;
+      font-weight: 950;
+      transition: color 0.3s ease;
+    }
+
+    .score-track {
+      height: 14px;
+      padding: 2px;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: 99px;
+      background: #020617;
+    }
+
+    #scoreBar {
+      width: 0%;
+      height: 100%;
+      border-radius: 99px;
+      background: #10b981;
+      transition: width 0.4s ease, background-color 0.4s ease;
+    }
+
+    .score-scale {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 7px;
+      font-size: 10px;
+      color: #64748b;
+    }
+
+    /* =========================================================
+       10. PHONE MOCKUP INTERFACE
+    ========================================================= */
+    .phone-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .phone {
+      width: 320px;
+      max-width: 100%;
+      height: 620px;
+      border-radius: 42px;
+      padding: 12px;
+      background: #020205;
+      border: 4px solid #313744;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+      position: relative;
+    }
+
+    .phone-notch {
+      width: 92px;
+      height: 20px;
+      margin: 0 auto 8px;
+      border-radius: 999px;
+      background: #000;
+    }
+
+    .phone-screen {
+      height: calc(100% - 28px);
+      overflow: hidden;
+      border-radius: 29px;
+      background: white;
+      color: #111827;
+      padding: 0;
+      position: relative;
+    }
+
+    .phone-stage {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px;
+      border-radius: 29px;
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      overflow-y: auto;
+      background: #ffffff;
+    }
+
+    .phone-stage.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .phone-bank-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 10px;
+      font-size: 11px;
+    }
+
+    .phone-bank-top strong {
+      color: #312e81;
+      font-size: 14px;
+    }
+
+    .phone-card {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+
+    .phone-card small {
+      display: block;
+      color: #6b7280;
+      font-size: 10px;
+    }
+
+    .phone-card strong {
+      display: block;
+      margin-top: 2px;
+      font-size: 13px;
+      color: #1e293b;
+    }
+
+    .phone-input-box {
+      margin-top: 10px;
+    }
+
+    .phone-input-box label {
+      font-size: 10px;
+      color: #475569;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .phone-input-box input {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-size: 12px;
+      outline: none;
+      background: #f8fafc;
+      font-weight: 700;
+    }
+
+    .phone-btn {
+      width: 100%;
+      padding: 12px;
+      border: 0;
+      border-radius: 12px;
+      color: white;
+      font-weight: 900;
+      font-size: 13px;
+      background: #4f46e5;
+      transition: transform 0.15s ease, opacity 0.2s ease;
+      cursor: pointer;
+    }
+
+    .phone-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* =========================================================
+       11. COMPARISON TABLE
+    ========================================================= */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 20px;
+      border: 1px solid rgba(148, 163, 184, 0.14);
+    }
+
+    table {
+      width: 100%;
+      min-width: 790px;
+      border-collapse: collapse;
+      background: rgba(15, 23, 42, 0.82);
+    }
+
+    th, td {
+      padding: 17px 18px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+      text-align: left;
+      font-size: 13px;
+    }
+
+    th {
+      color: #94a3b8;
+      background: rgba(2, 6, 23, 0.42);
+      font-weight: 800;
+    }
+
+    td {
+      color: #cbd5e1;
+    }
+
+    td:first-child {
+      color: white;
+      font-weight: 800;
+    }
+
+    .pb-cell {
+      color: #67e8f9;
+      font-weight: 850;
+      background: rgba(6, 182, 212, 0.05);
+    }
+
+    /* =========================================================
+       12. EFFECTS & STRUCTURE
+    ========================================================= */
+    .effect-number {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      color: #67e8f9;
+      font-size: 14px;
+      font-weight: 950;
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.24);
+      margin-bottom: 16px;
+    }
+
+    .structure {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 13px;
+      align-items: stretch;
+    }
+
+    .structure-box {
+      min-height: 132px;
+      padding: 20px;
+      border-radius: 17px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      text-align: center;
+    }
+
+    .structure-box strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .structure-box span {
+      color: #94a3b8;
+      font-size: 11px;
+    }
+
+    .structure-center {
+      border-color: rgba(239, 68, 68, 0.35);
+      background: linear-gradient(180deg, rgba(127, 29, 29, 0.3), rgba(15, 23, 42, 0.9));
+    }
+
+    /* =========================================================
+       13. FINAL CTA & DISCLAIMER & FOOTER
+    ========================================================= */
+    .final-message {
+      max-width: 930px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 55px 30px;
+      border-radius: 25px;
+      border: 1px solid rgba(103, 232, 249, 0.16);
+      background: linear-gradient(135deg, rgba(30, 58, 138, 0.25), rgba(15, 23, 42, 0.84), rgba(127, 29, 29, 0.2));
+    }
+
+    .final-message h2 {
+      font-size: clamp(27px, 4vw, 42px);
+      margin-bottom: 17px;
+      letter-spacing: -0.04em;
+    }
+
+    .final-message p {
+      color: #aebbd0;
+      max-width: 730px;
+      margin: 0 auto;
+    }
+
+    .disclaimer {
+      max-width: 950px;
+      margin: 35px auto 0;
+      padding: 16px 18px;
+      border-radius: 14px;
+      background: rgba(148, 163, 184, 0.05);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      font-size: 11px;
+      color: #8492a7;
+    }
+
+    footer {
+      border-top: 1px solid rgba(148, 163, 184, 0.12);
+      padding: 38px 0;
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      gap: 30px;
+      align-items: center;
+    }
+
+    /* RESPONSIVE MEDIA QUERIES */
+    @media (max-width: 950px) {
+      nav { display: none; }
+      .mobile-menu-btn { display: block; }
+      .mobile-menu.open { display: block; }
+      .stats-grid, .cards-3, .risk-grid { grid-template-columns: repeat(2, 1fr); }
+      .simulator-layout { grid-template-columns: 1fr; }
+      .phone-area { margin-top: 20px; }
+      .structure { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 650px) {
+      .container { width: min(100% - 28px, 1180px); }
+      .section { padding: 75px 0; }
+      .hero { min-height: auto; padding-top: 75px; }
+      .stats-grid, .cards-2, .cards-3, .risk-grid, .structure { grid-template-columns: 1fr; }
+      .comparison-mini { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; text-align: center; }
+      .phone { width: 310px; }
+    }
+  </style>
 </head>
-<body class="bg-dark-bg text-gray-100 overflow-x-hidden grid-bg">
 
-    <!-- Background Glow Effects -->
-    <div class="glow-effect bg-blue-600 w-96 h-96 top-0 left-1/4"></div>
-    <div class="glow-effect bg-red-600 w-96 h-96 top-1/3 right-10"></div>
-    <div class="glow-effect bg-emerald-600 w-80 h-80 bottom-1/4 left-10"></div>
+<body>
 
-    <!-- Sticky Header / GNB -->
-    <header class="sticky top-0 z-50 backdrop-blur-xl bg-dark-bg/80 border-b border-dark-border transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
-                <!-- Brand Logo -->
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 via-accent-indigo to-cyan-400 p-0.5 flex items-center justify-center shadow-neon-red">
-                        <div class="w-full h-full bg-dark-bg rounded-[10px] flex items-center justify-center">
-                            <i class="fa-solid fa-shield-halved text-red-500 text-xl"></i>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="text-xl font-black tracking-wider bg-gradient-to-r from-white via-gray-200 to-red-400 bg-clip-text text-transparent">
-                            PHISHING BRAKE
-                        </span>
-                        <span class="hidden md:inline-block ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
-                            AI INTERCEPT SYSTEM
-                        </span>
-                    </div>
-                </div>
+  <!-- =========================================================
+       HEADER
+  ========================================================== -->
+  <header>
+    <div class="container">
+      <div class="header-inner">
 
-                <!-- Desktop Nav Navigation -->
-                <nav class="hidden lg:flex items-center space-x-8 text-sm font-medium text-gray-300">
-                    <a href="#about" class="hover:text-cyan-400 transition-colors">시스템 소개</a>
-                    <a href="#problem" class="hover:text-cyan-400 transition-colors">문제 및 필요성</a>
-                    <a href="#process" class="hover:text-cyan-400 transition-colors">핵심 메커니즘</a>
-                    <a href="#simulator" class="hover:text-cyan-400 transition-colors text-amber-400 font-semibold flex items-center space-x-1">
-                        <i class="fa-solid fa-gamepad text-xs"></i>
-                        <span>인터셉트 시뮬레이터</span>
-                    </a>
-                    <a href="#roi" class="hover:text-cyan-400 transition-colors text-emerald-400 font-semibold">도입 ROI 계산기</a>
-                    <a href="#comparison" class="hover:text-cyan-400 transition-colors">기존 기법 비교</a>
-                    <a href="#telco" class="hover:text-cyan-400 transition-colors">통신사 SDK (B2B)</a>
-                </nav>
+        <a href="#home" class="brand">
+          <div class="brand-icon">🛡️</div>
+          <div>
+            <div class="brand-title">PHISHING BRAKE</div>
+            <div class="brand-sub">AI Risk Score 기반 다단계 인터셉트 시스템</div>
+          </div>
+        </a>
 
-                <!-- Header Action Buttons -->
-                <div class="hidden sm:flex items-center space-x-4">
-                    <button onclick="openInquiryModal()" class="relative group px-5 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-red-600 to-indigo-600 text-white shadow-lg hover:shadow-neon-red transition-all duration-300 overflow-hidden">
-                        <span class="relative z-10 flex items-center space-x-2">
-                            <span>통신사 연동 제안서 신청</span>
-                            <i class="fa-solid fa-arrow-right text-xs group-hover:translate-x-1 transition-transform"></i>
-                        </span>
-                    </button>
-                </div>
+        <nav>
+          <a href="#problem">문제 및 필요성</a>
+          <a href="#mechanism">핵심 메커니즘</a>
+          <a href="#simulator">시뮬레이터</a>
+          <a href="#comparison">기존 기법 비교</a>
+          <a href="#effects">기대효과</a>
+          <a href="#application">적용 구조</a>
+        </nav>
 
-                <!-- Mobile Menu Button -->
-                <div class="lg:hidden flex items-center">
-                    <button id="mobileMenuBtn" onclick="toggleMobileMenu()" class="text-gray-300 hover:text-white p-2 focus:outline-none">
-                        <i class="fa-solid fa-bars text-2xl"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
+        <button
+          class="mobile-menu-btn"
+          onclick="toggleMobileMenu()"
+          aria-label="모바일 메뉴 열기"
+        >
+          ☰
+        </button>
 
-        <!-- Mobile Nav Menu -->
-        <div id="mobileMenu" class="hidden lg:hidden bg-dark-card border-b border-dark-border px-4 pt-2 pb-6 space-y-3">
-            <a href="#about" onclick="toggleMobileMenu()" class="block py-2 text-gray-300 hover:text-cyan-400">시스템 소개</a>
-            <a href="#problem" onclick="toggleMobileMenu()" class="block py-2 text-gray-300 hover:text-cyan-400">문제 및 필요성</a>
-            <a href="#process" onclick="toggleMobileMenu()" class="block py-2 text-gray-300 hover:text-cyan-400">핵심 메커니즘</a>
-            <a href="#simulator" onclick="toggleMobileMenu()" class="block py-2 text-amber-400 font-bold">인터셉트 시뮬레이터</a>
-            <a href="#roi" onclick="toggleMobileMenu()" class="block py-2 text-emerald-400 font-bold">도입 ROI 계산기</a>
-            <a href="#comparison" onclick="toggleMobileMenu()" class="block py-2 text-gray-300 hover:text-cyan-400">기존 기법 비교</a>
-            <a href="#telco" onclick="toggleMobileMenu()" class="block py-2 text-gray-300 hover:text-cyan-400">통신사 SDK (B2B)</a>
-            <button onclick="toggleMobileMenu(); openInquiryModal()" class="w-full mt-4 py-3 rounded-xl font-bold bg-gradient-to-r from-red-600 to-indigo-600 text-white text-center">
-                통신사 연동 제안서 신청
-            </button>
-        </div>
-    </header>
+      </div>
 
-    <!-- HERO SECTION -->
-    <section id="about" class="relative pt-12 pb-20 md:pt-20 md:pb-32 overflow-hidden">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="text-center max-w-4xl mx-auto">
-                <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 text-xs sm:text-sm font-semibold mb-8 animate-pulse">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                    <span>보이스피싱 대응의 패러다임 전환: 단순 탐지에서 행동 직전 개입으로</span>
-                </div>
-                
-                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight sm:leading-tight mb-8">
-                    "위험을 발견했다면,<br class="hidden sm:inline"> 
-                    <span class="bg-gradient-to-r from-red-500 via-amber-400 to-cyan-400 bg-clip-text text-transparent">
-                        행동 직전에 멈추게 합니다.
-                    </span>"
-                </h1>
-                
-                <p class="text-lg sm:text-xl text-gray-300 font-normal leading-relaxed mb-10 max-w-3xl mx-auto">
-                    단순한 경고 메시지는 심리적 압박 상태인 피해자의 가시적인 행동을 멈추기 부족합니다.<br class="hidden sm:inline">
-                    <strong class="text-white font-semibold">PHISHING BRAKE</strong>는 AI Risk Score를 기반으로 위험 신호를 통합 분석하여,<br class="hidden sm:inline">
-                    송금·인증 등 피해 발생 직전의 <span class="text-red-400 underline decoration-red-500 decoration-2 underline-offset-4">판단 순간(Judgment Moment)</span>을 차등 개입·제어합니다.
-                </p>
+      <div id="mobileMenu" class="mobile-menu">
+        <a href="#problem" onclick="toggleMobileMenu()">문제 및 필요성</a>
+        <a href="#mechanism" onclick="toggleMobileMenu()">핵심 메커니즘</a>
+        <a href="#simulator" onclick="toggleMobileMenu()">인터셉트 시뮬레이터</a>
+        <a href="#comparison" onclick="toggleMobileMenu()">기존 기법 비교</a>
+        <a href="#effects" onclick="toggleMobileMenu()">기대효과</a>
+        <a href="#application" onclick="toggleMobileMenu()">적용 구조</a>
+      </div>
 
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-                    <a href="#simulator" class="w-full sm:w-auto px-8 py-4 rounded-xl text-base font-extrabold bg-gradient-to-r from-red-600 to-indigo-600 text-white shadow-neon-red hover:scale-105 transition-all duration-300 flex items-center justify-center space-x-3">
-                        <i class="fa-solid fa-play"></i>
-                        <span>시뮬레이터 모의 체험</span>
-                    </a>
-                    <button onclick="openInquiryModal()" class="w-full sm:w-auto px-8 py-4 rounded-xl text-base font-bold bg-dark-card border border-dark-border text-gray-200 hover:bg-dark-hover hover:border-gray-500 transition-all duration-300 flex items-center justify-center space-x-2">
-                        <i class="fa-solid fa-building"></i>
-                        <span>통신사 연동 제안서 요청</span>
-                    </button>
-                </div>
+    </div>
+  </header>
+
+  <!-- =========================================================
+       HERO
+  ========================================================== -->
+  <main>
+
+    <section class="hero" id="home">
+      <div class="container">
+
+        <div class="hero-content">
+
+          <div class="eyebrow">
+            ⚠ 행동 직전의 판단 순간에 개입
+          </div>
+
+          <h1>
+            위험을 발견했다면,<br />
+            <span class="hero-gradient">
+              행동 직전에 한 번 더 멈춥니다.
+            </span>
+          </h1>
+
+          <p class="hero-desc">
+            <strong>PHISHING BRAKE</strong>는
+            보이스피싱 위험 신호를 종합해 위험 수준을 판단하고,
+            송금·인증 등 실제 행동이 완료되기 직전에
+            위험 수준에 따라 재확인·추가 인증·일시 중단 등
+            개입 강도를 조절하는
+            <strong>AI Risk Score 기반 다단계 인터셉트 시스템</strong>입니다.
+          </p>
+
+          <div class="hero-actions">
+            <a href="#simulator" class="primary-btn">
+              ▶ 인터셉트 시뮬레이터 체험
+            </a>
+            <a href="#mechanism" class="secondary-btn">
+              시스템 작동 원리 보기
+            </a>
+          </div>
+
+          <!-- KEY DATA STATS -->
+          <div class="stats-grid">
+
+            <div class="stat-card">
+              <div class="stat-label">
+                2025년 1~11월 보이스피싱 피해액
+              </div>
+              <div class="stat-value highlight-red">
+                1조 1,330억 원
+              </div>
+              <div class="stat-note">
+                전년 동기 대비 피해액 56.1% 증가
+              </div>
             </div>
 
-            <!-- Key Statistics Counters Banner -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mt-8">
-                <!-- Stat Card 1 -->
-                <div class="bg-dark-card/90 border border-dark-border rounded-2xl p-6 backdrop-blur-md relative overflow-hidden group hover:border-red-500/50 transition-colors">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-red-500/5 rounded-full blur-xl group-hover:bg-red-500/10 transition-colors"></div>
-                    <div class="text-xs font-semibold text-gray-400 mb-1">2025년 1~11월 피해 규모 및 잔여 피해액</div>
-                    <div class="text-3xl font-black text-red-500 mb-2 flex items-baseline space-x-2">
-                        <span>1조 1,330억 원</span>
-                        <span class="text-xs font-bold text-red-400 bg-red-500/10 px-2 py-0.5 rounded">+56.1% ▲</span>
-                    </div>
-                    <p class="text-xs text-gray-400">최근 감소세 전환에도 잔여 피해액은 6,324억 원(2025.10~2026.07)으로 막대함</p>
-                </div>
-
-                <!-- Stat Card 2 -->
-                <div class="bg-dark-card/90 border border-dark-border rounded-2xl p-6 backdrop-blur-md relative overflow-hidden group hover:border-cyan-500/50 transition-colors">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full blur-xl group-hover:bg-cyan-500/10 transition-colors"></div>
-                    <div class="text-xs font-semibold text-gray-400 mb-1">뉴스 빅데이터 분석 결과 (4,354건)</div>
-                    <div class="text-3xl font-black text-cyan-400 mb-2 flex items-baseline space-x-2">
-                        <span>74.9%</span>
-                        <span class="text-xs text-gray-300 font-normal">신뢰×압박×행동 결합</span>
-                    </div>
-                    <p class="text-xs text-gray-400">기관/지인 신뢰와 긴급 압박이 전화·송금·인증 행동으로 동시 유발됨</p>
-                </div>
-
-                <!-- Stat Card 3 -->
-                <div class="bg-dark-card/90 border border-dark-border rounded-2xl p-6 backdrop-blur-md relative overflow-hidden group hover:border-emerald-500/50 transition-colors">
-                    <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl group-hover:bg-emerald-500/10 transition-colors"></div>
-                    <div class="text-xs font-semibold text-gray-400 mb-1">PHISHING BRAKE 핵심 목표</div>
-                    <div class="text-3xl font-black text-emerald-400 mb-2 flex items-baseline space-x-2">
-                        <span>0% Friction</span>
-                        <span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">정상 거래</span>
-                    </div>
-                    <p class="text-xs text-gray-400">정상 거래의 불편함은 0에 수렴, 고위험 상황에만 정밀 차단 개입</p>
-                </div>
+            <div class="stat-card">
+              <div class="stat-label">
+                자체 뉴스 텍스트 분석
+              </div>
+              <div class="stat-value highlight-blue">
+                74.9%
+              </div>
+              <div class="stat-note">
+                4,354건 중 신뢰·압박·행동 요소가 함께 나타난 기사 비율
+              </div>
             </div>
+
+            <div class="stat-card">
+              <div class="stat-label">
+                PHISHING BRAKE 핵심 원칙
+              </div>
+              <div class="stat-value highlight-green">
+                차등 개입
+              </div>
+              <div class="stat-note">
+                정상 거래 개입은 최소화하고, 위험 수준이 높을수록 개입 강도를 강화
+              </div>
+            </div>
+
+          </div>
+
+          <div class="disclaimer">
+            자료 출처:
+            금융위원회 「보이스피싱 근절 종합대책 추진상황 점검」
+            및 관련 발표자료 /
+            한국언론진흥재단 뉴스빅데이터 메타데이터 자체 키워드 분석 (n=4,354).
+            서로 다른 기간의 통계는 하나의 연속 시계열로 해석하지 않습니다.
+          </div>
+
         </div>
+
+      </div>
     </section>
 
-    <!-- PROBLEM STATEMENT SECTION -->
-    <section id="problem" class="py-20 bg-dark-card/40 border-y border-dark-border">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <h2 class="text-xs font-bold uppercase tracking-widest text-red-400 mb-3">Problem Statement</h2>
-                <h3 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">대응 강화에도 여전히 피해가 남아있는 이유</h3>
-                <p class="text-gray-400">경고만으로는 심리적 압박에 빠진 사용자의 행동을 멈출 수 없으며,<br class="hidden sm:inline">일률적 차단은 정상 금융 거래에 불필요한 마찰을 유발합니다.</p>
-            </div>
+    <!-- =========================================================
+         PROBLEM
+    ========================================================== -->
+    <section id="problem" class="section section-soft">
+      <div class="container">
 
-            <!-- News Data Visualization Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
-                <!-- Left: News Analysis Stats -->
-                <div class="bg-dark-card border border-dark-border rounded-2xl p-8 space-y-6">
-                    <div class="flex items-center justify-between border-b border-dark-border pb-4">
-                        <h4 class="text-lg font-bold text-white flex items-center space-x-2">
-                            <i class="fa-solid fa-newspaper text-cyan-400"></i>
-                            <span>뉴스 텍스트 분석 결과 (n=4,354건)</span>
-                        </h4>
-                        <span class="text-xs bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 px-2.5 py-1 rounded-full">자체 빅데이터 분석</span>
-                    </div>
-                    <p class="text-sm text-gray-300 leading-relaxed">
-                        보이스피싱은 수신자에게 단순 위험 정보가 전달되는 것에서 끝나지 않습니다. <strong class="text-white">기관·지인 사칭(신뢰)</strong>과 <strong class="text-white">긴급 대응 유도(압박)</strong>가 결합될 때 사용자는 극 짧은 시간 내에 판단을 강요받습니다.
-                    </p>
-
-                    <!-- Behavioral breakdown bars -->
-                    <div class="space-y-4 pt-2">
-                        <div>
-                            <div class="flex justify-between text-sm mb-1">
-                                <span class="font-medium text-gray-200">전화 통화 요구</span>
-                                <span class="font-bold text-red-400">54.9%</span>
-                            </div>
-                            <div class="w-full bg-dark-bg rounded-full h-2.5">
-                                <div class="bg-red-500 h-2.5 rounded-full" style="width: 54.9%"></div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="flex justify-between text-sm mb-1">
-                                <span class="font-medium text-gray-200">송금·이체 요구</span>
-                                <span class="font-bold text-amber-400">43.8%</span>
-                            </div>
-                            <div class="w-full bg-dark-bg rounded-full h-2.5">
-                                <div class="bg-amber-500 h-2.5 rounded-full" style="width: 43.8%"></div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="flex justify-between text-sm mb-1">
-                                <span class="font-medium text-gray-200">개인정보·인증정보 요구</span>
-                                <span class="font-bold text-indigo-400">35.8%</span>
-                            </div>
-                            <div class="w-full bg-dark-bg rounded-full h-2.5">
-                                <div class="bg-indigo-500 h-2.5 rounded-full" style="width: 35.8%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right: Warning vs Interruption Gap Diagram -->
-                <div class="space-y-6">
-                    <div class="bg-gradient-to-br from-red-950/40 via-dark-card to-dark-card border border-red-500/20 rounded-2xl p-8 relative">
-                        <div class="inline-block px-3 py-1 bg-red-500/20 text-red-400 text-xs font-bold rounded-lg mb-4">
-                            기존 방식의 개입 공백 (Gap)
-                        </div>
-                        <h4 class="text-xl font-bold text-white mb-3">"경고(WARNING)와 행동 중단(INTERRUPTION)은 다릅니다"</h4>
-                        <p class="text-sm text-gray-300 leading-relaxed mb-6">
-                            기존 시스템은 단순 경고를 띄워도 심리적 신뢰/압박 상태인 사용자가 계속 [확인/진행] 버튼을 누르면 피해로 직결됩니다. 그렇다고 모든 의심 거래를 차단하면 정상 금융 생활이 마비됩니다.
-                        </p>
-
-                        <!-- Visual Comparison Box inside -->
-                        <div class="grid grid-cols-2 gap-4 text-center">
-                            <div class="bg-dark-bg/80 border border-dark-border p-4 rounded-xl">
-                                <div class="text-amber-400 text-xs font-bold mb-1">▲ 단순 경고</div>
-                                <div class="text-gray-300 text-xs">경고창 표시 후 사용자가 계속 진행 가능 <span class="text-red-400 block font-semibold mt-1">→ 피해 차단 실패</span></div>
-                            </div>
-                            <div class="bg-dark-bg/80 border border-dark-border p-4 rounded-xl">
-                                <div class="text-red-400 text-xs font-bold mb-1">▲ 일률적 차단</div>
-                                <div class="text-gray-300 text-xs">의심 시 무조건 거래 강제 차단 <span class="text-red-400 block font-semibold mt-1">→ 정상 사용자 극심한 불편</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="section-heading">
+          <div class="eyebrow">
+            PROBLEM
+          </div>
+          <h2>
+             문제는 단순히
+            <span class="highlight-red">위험을 모르는 것</span>만이 아닙니다.
+          </h2>
+          <p>
+            보이스피싱 상황에서는 기관·가족·지인 등에 대한 신뢰와
+            긴급한 압박이 결합되면서,
+            사용자가 짧은 시간 안에 실제 행동 여부를 결정해야 할 수 있습니다.
+          </p>
         </div>
-    </section>
 
-    <!-- CORE PROCESS / SOLUTION SECTION -->
-    <section id="process" class="py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <h2 class="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-3">Core Solution</h2>
-                <h3 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">행동 직전의 판단 순간 (JUDGMENT MOMENT) 개입</h3>
-                <p class="text-gray-400">사용자가 연락을 받고 최종 행동(송금·인증)을 완료하기 바로 전 단계에서<br class="hidden sm:inline"> 시스템이 직접 찾아와 안전 여부를 다시 확인하도록 시간을 확보합니다.</p>
-            </div>
+        <div class="cards-2">
 
-            <!-- Timeline Step Flow -->
-            <div class="relative max-w-5xl mx-auto mb-20">
-                <div class="hidden md:block absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-gray-700 via-red-500 to-emerald-500 -translate-y-1/2 z-0"></div>
-
-                <div class="grid grid-cols-1 md:grid-cols-6 gap-4 relative z-10">
-                    <!-- Step 1 -->
-                    <div class="bg-dark-card border border-dark-border p-4 rounded-xl text-center">
-                        <div class="w-8 h-8 rounded-full bg-gray-800 text-gray-400 font-bold flex items-center justify-center mx-auto mb-2 text-xs">01</div>
-                        <div class="text-xs font-bold text-gray-300">CONTACT</div>
-                        <div class="text-[11px] text-gray-400 mt-1">기관/지인 사칭 연락 수신</div>
-                    </div>
-
-                    <!-- Step 2 -->
-                    <div class="bg-dark-card border border-dark-border p-4 rounded-xl text-center">
-                        <div class="w-8 h-8 rounded-full bg-gray-800 text-gray-400 font-bold flex items-center justify-center mx-auto mb-2 text-xs">02</div>
-                        <div class="text-xs font-bold text-gray-300">TRUST</div>
-                        <div class="text-[11px] text-gray-400 mt-1">거짓 정보로 신뢰 형성</div>
-                    </div>
-
-                    <!-- Step 3 -->
-                    <div class="bg-dark-card border border-dark-border p-4 rounded-xl text-center">
-                        <div class="w-8 h-8 rounded-full bg-gray-800 text-gray-400 font-bold flex items-center justify-center mx-auto mb-2 text-xs">03</div>
-                        <div class="text-xs font-bold text-gray-300">URGENCY</div>
-                        <div class="text-[11px] text-gray-400 mt-1">긴급 압박 및 심리 조율</div>
-                    </div>
-
-                    <!-- Step 4 -->
-                    <div class="bg-dark-card border border-dark-border p-4 rounded-xl text-center">
-                        <div class="w-8 h-8 rounded-full bg-gray-800 text-gray-400 font-bold flex items-center justify-center mx-auto mb-2 text-xs">04</div>
-                        <div class="text-xs font-bold text-gray-300">ACTION REQ.</div>
-                        <div class="text-[11px] text-gray-400 mt-1">송금/앱설치 행동 요구</div>
-                    </div>
-
-                    <!-- Step 5: CORE INTERCEPT -->
-                    <div class="bg-gradient-to-b from-red-600/30 to-red-950/80 border-2 border-red-500 p-4 rounded-xl text-center shadow-neon-red scale-105 transform">
-                        <div class="w-8 h-8 rounded-full bg-red-500 text-white font-black flex items-center justify-center mx-auto mb-2 text-xs">05</div>
-                        <div class="text-xs font-black text-red-400 animate-pulse">JUDGMENT</div>
-                        <div class="text-[11px] font-bold text-white mt-1">행동 직전 판단 순간 (INTERCEPT)</div>
-                    </div>
-
-                    <!-- Step 6 -->
-                    <div class="bg-dark-card border border-dark-border p-4 rounded-xl text-center">
-                        <div class="w-8 h-8 rounded-full bg-emerald-800 text-emerald-400 font-bold flex items-center justify-center mx-auto mb-2 text-xs">06</div>
-                        <div class="text-xs font-bold text-emerald-400">ACTION</div>
-                        <div class="text-[11px] text-gray-400 mt-1">안전 확인 후 거래 재개/차단</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Risk Level Cards Stage -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <!-- Level 1: Normal -->
-                <div class="bg-dark-card border border-dark-border rounded-2xl p-6 hover:border-emerald-500/50 transition-all">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">NORMAL (정상)</span>
-                        <i class="fa-solid fa-circle-check text-emerald-400 text-xl"></i>
-                    </div>
-                    <h4 class="text-lg font-bold text-white mb-2">불필요한 개입 최소화</h4>
-                    <p class="text-xs text-gray-400 leading-relaxed">
-                        평소 이용 패턴과 유사한 안전 거래 시 개입 절차 없이 즉시 거래를 완료하여 사용자 불편을 제로화합니다.
-                    </p>
-                </div>
-
-                <!-- Level 2: Attention/Caution -->
-                <div class="bg-dark-card border border-dark-border rounded-2xl p-6 hover:border-amber-500/50 transition-all">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">CAUTION (주의)</span>
-                        <i class="fa-solid fa-triangle-exclamation text-amber-400 text-xl"></i>
-                    </div>
-                    <h4 class="text-lg font-bold text-white mb-2">거래 목적 및 수취인 재확인</h4>
-                    <p class="text-xs text-gray-400 leading-relaxed">
-                        일부 경미한 이상 신호 감지 시, 거래 목적 및 수취인의 관계를 한번 더 자가 체크하도록 재확인 화면을 제공합니다.
-                    </p>
-                </div>
-
-                <!-- Level 3: High Risk -->
-                <div class="bg-dark-card border border-dark-border rounded-2xl p-6 hover:border-orange-500/50 transition-all">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20">HIGH RISK (고위험)</span>
-                        <i class="fa-solid fa-hand text-orange-400 text-xl"></i>
-                    </div>
-                    <h4 class="text-lg font-bold text-white mb-2">행동 일시 중단 (INTERCEPT)</h4>
-                    <p class="text-xs text-gray-400 leading-relaxed">
-                        복수의 위험 신호 중첩 시, "잠시 멈춰주세요" 풀스크린 인터셉트로 거래 흐름을 지연시키고 추가 생체인증 등을 요구합니다.
-                    </p>
-                </div>
-
-                <!-- Level 4: Critical -->
-                <div class="bg-dark-card border border-dark-border rounded-2xl p-6 hover:border-red-500/50 transition-all">
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-red-500/10 text-red-400 border border-red-500/20">CRITICAL (매우 고위험)</span>
-                        <i class="fa-solid fa-ban text-red-500 text-xl"></i>
-                    </div>
-                    <h4 class="text-lg font-bold text-white mb-2">거래 정지 & 경찰/금융사 연계</h4>
-                    <p class="text-xs text-gray-400 leading-relaxed">
-                        악성 앱 설치 및 사칭 통화 동시 감지 시 거래를 즉시 차단하고, 112 및 금융사 당직 센터로 실시간 신고 연계합니다.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- INTERACTIVE SIMULATOR SECTION -->
-    <section id="simulator" class="py-20 bg-dark-card/60 border-y border-dark-border relative">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <span class="px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold">LIVE INTERACTIVE DEMO</span>
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-3 mb-4">AI Risk Score & Intercept 모의 시뮬레이터</h2>
-                <p class="text-gray-400">의심 상황 요소를 체크해보세요. AI가 실시간으로 Risk Score를 계산하고,<br class="hidden sm:inline"> 스마트폰 화면에서 Phishing Brake가 작동하는 방식을 직접 체험할 수 있습니다.</p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-6xl mx-auto">
-                <!-- Left Column: Risk Factor Selector (7 cols) -->
-                <div class="lg:col-span-7 bg-dark-card border border-dark-border rounded-2xl p-6 sm:p-8">
-                    <div class="flex items-center justify-between border-b border-dark-border pb-4 mb-6">
-                        <h3 class="text-lg font-bold text-white flex items-center space-x-2">
-                            <i class="fa-solid fa-sliders text-cyan-400"></i>
-                            <span>위험 신호 감지 요소 선택</span>
-                        </h3>
-                        <div class="flex items-center space-x-3">
-                            <button onclick="toggleVoiceAudioSim()" id="voiceSimBtn" class="text-xs px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 border border-red-500/40 font-bold hover:bg-red-500/30 flex items-center space-x-1.5">
-                                <i class="fa-solid fa-circle-dot animate-pulse"></i>
-                                <span>AI 실시간 음성 감지 시연</span>
-                            </button>
-                            <button onclick="resetSimulator()" class="text-xs text-gray-400 hover:text-white underline">
-                                초기화
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Voice AI Real-time Audio Transcript Stream Box with Equalizer Animation -->
-                    <div id="voiceStreamBox" class="hidden mb-6 p-4 bg-black/60 border border-red-500/40 rounded-xl">
-                        <div class="flex items-center justify-between text-xs mb-2">
-                            <div class="flex items-center space-x-2">
-                                <!-- Soundwave Equalizer Bars -->
-                                <div class="flex items-end space-x-0.5 h-6">
-                                    <div class="eq-bar"></div>
-                                    <div class="eq-bar"></div>
-                                    <div class="eq-bar"></div>
-                                    <div class="eq-bar"></div>
-                                    <div class="eq-bar"></div>
-                                </div>
-                                <span class="text-red-400 font-bold">통신사 VOICE AI 실시간 키워드 추출 중...</span>
-                            </div>
-                            <span id="voiceSimStatus" class="text-gray-400 font-mono">00:00</span>
-                        </div>
-                        <div id="voiceTranscript" class="text-xs text-gray-300 font-mono space-y-1 h-24 overflow-y-auto p-2 bg-dark-bg/80 rounded border border-gray-800">
-                            <p class="text-gray-500 italic">[음성 실시간 시연 버튼을 누르면 사칭 통화 스크립트 분석이 시작됩니다]</p>
-                        </div>
-                    </div>
-
-                    <!-- Checkbox options list -->
-                    <div class="space-y-4">
-                        <!-- Option 1 -->
-                        <label class="flex items-start space-x-4 p-4 rounded-xl bg-dark-bg/60 border border-dark-border hover:border-gray-600 cursor-pointer transition-all">
-                            <input type="checkbox" id="risk1" value="35" onchange="updateSimulator()" class="mt-1 w-5 h-5 rounded border-gray-700 text-red-600 focus:ring-red-500 bg-dark-bg">
-                            <div>
-                                <div class="text-sm font-bold text-gray-200 flex items-center space-x-2">
-                                    <span>검찰·경찰·금감원 기관 사칭 의심 통화 진행 중</span>
-                                    <span class="text-[10px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded font-bold">+35점</span>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-1">통신사 voice AI 실시간 탐지: 긴급·압박 키워드 및 미등록 번호 통화</p>
-                            </div>
-                        </label>
-
-                        <!-- Option 2 -->
-                        <label class="flex items-start space-x-4 p-4 rounded-xl bg-dark-bg/60 border border-dark-border hover:border-gray-600 cursor-pointer transition-all">
-                            <input type="checkbox" id="risk2" value="25" onchange="updateSimulator()" class="mt-1 w-5 h-5 rounded border-gray-700 text-red-600 focus:ring-red-500 bg-dark-bg">
-                            <div>
-                                <div class="text-sm font-bold text-gray-200 flex items-center space-x-2">
-                                    <span>출처 불분명 미끼문자(SMS) 내 URL 클릭</span>
-                                    <span class="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold">+25점</span>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-1">택배, 청첩장, 정부지원금 빙자 피싱 링크 접속 이력 존재</p>
-                            </div>
-                        </label>
-
-                        <!-- Option 3 -->
-                        <label class="flex items-start space-x-4 p-4 rounded-xl bg-dark-bg/60 border border-dark-border hover:border-gray-600 cursor-pointer transition-all">
-                            <input type="checkbox" id="risk3" value="30" onchange="updateSimulator()" class="mt-1 w-5 h-5 rounded border-gray-700 text-red-600 focus:ring-red-500 bg-dark-bg">
-                            <div>
-                                <div class="text-sm font-bold text-gray-200 flex items-center space-x-2">
-                                    <span>원격제어 앱(TeamViewer 등) 또는 악성 APK 설치</span>
-                                    <span class="text-[10px] bg-red-500/20 text-red-400 px-2 py-0.5 rounded font-bold">+30점</span>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-1">스마트폰 내 악성 가상키패드 및 원격 탐지 엔진 활성화</p>
-                            </div>
-                        </label>
-
-                        <!-- Option 4 -->
-                        <label class="flex items-start space-x-4 p-4 rounded-xl bg-dark-bg/60 border border-dark-border hover:border-gray-600 cursor-pointer transition-all">
-                            <input type="checkbox" id="risk4" value="20" onchange="updateSimulator()" class="mt-1 w-5 h-5 rounded border-gray-700 text-red-600 focus:ring-red-500 bg-dark-bg">
-                            <div>
-                                <div class="text-sm font-bold text-gray-200 flex items-center space-x-2">
-                                    <span>평소 거래 패턴과 다른 신규 계좌 대액 송금 시도</span>
-                                    <span class="text-[10px] bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded font-bold">+20점</span>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-1">금융 FDS 연동: 이체 한도 직전 고액 송금 및 심야/야간 시도</p>
-                            </div>
-                        </label>
-                    </div>
-
-                    <!-- Live Risk Score Meter Bar -->
-                    <div class="mt-8 pt-6 border-t border-dark-border">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-sm font-bold text-gray-300">종합 AI Risk Score</span>
-                            <span id="scoreText" class="text-2xl font-black text-emerald-400">10 / 100 점 (안전)</span>
-                        </div>
-                        <div class="w-full bg-dark-bg rounded-full h-4 p-0.5 border border-dark-border">
-                            <div id="scoreBar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 10%"></div>
-                        </div>
-                        <div class="flex justify-between text-[10px] text-gray-400 mt-2 font-mono">
-                            <span>0 (NORMAL)</span>
-                            <span>30 (CAUTION)</span>
-                            <span>60 (행동중단)</span>
-                            <span>90 (CRITICAL BLOCK)</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Column: Simulated Smartphone Mockup with Level 1~4 Quick Switcher (5 cols) -->
-                <div class="lg:col-span-5 flex flex-col items-center">
-                    <!-- Quick Level Switcher for Demonstrations -->
-                    <div class="w-full max-w-[320px] mb-3 bg-dark-bg p-1.5 rounded-xl border border-dark-border flex justify-between text-[11px] font-bold">
-                        <button onclick="setDirectLevel(1)" class="px-2 py-1 rounded-lg text-emerald-400 hover:bg-emerald-500/10">정상</button>
-                        <button onclick="setDirectLevel(2)" class="px-2 py-1 rounded-lg text-amber-400 hover:bg-amber-500/10">주의</button>
-                        <button onclick="setDirectLevel(3)" class="px-2 py-1 rounded-lg text-orange-400 hover:bg-orange-500/10">행동중단</button>
-                        <button onclick="setDirectLevel(4)" class="px-2 py-1 rounded-lg text-red-500 hover:bg-red-500/10">위급차단</button>
-                    </div>
-
-                    <!-- Phone Chassis Frame -->
-                    <div class="w-full max-w-[320px] h-[580px] bg-black rounded-[40px] p-3 border-4 border-gray-800 shadow-2xl relative overflow-hidden flex flex-col">
-                        <!-- Camera Notch / Dynamic Island -->
-                        <div class="w-28 h-5 bg-black rounded-full mx-auto mb-2 z-30 flex items-center justify-center">
-                            <div class="w-3 h-3 bg-gray-900 rounded-full"></div>
-                        </div>
-
-                        <!-- Phone Screen Content (Dynamic State) -->
-                        <div id="phoneScreen" class="flex-1 bg-white rounded-[30px] p-4 text-gray-900 relative overflow-hidden flex flex-col justify-between transition-colors duration-500">
-                            
-                            <!-- STATE 1: NORMAL BANKING FLOW (Default) -->
-                            <div id="screenNormal" class="h-full flex flex-col justify-between">
-                                <div>
-                                    <div class="flex items-center justify-between pb-3 border-b border-gray-200">
-                                        <span class="font-extrabold text-indigo-900 text-sm">OO뱅크</span>
-                                        <span class="text-[10px] text-gray-400">송금 확인</span>
-                                    </div>
-
-                                    <div class="mt-6 space-y-4">
-                                        <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
-                                            <div class="text-[11px] text-gray-500">받는 사람</div>
-                                            <div class="font-bold text-gray-800 text-sm">김*철 (국민 302-****)</div>
-                                        </div>
-
-                                        <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
-                                            <div class="text-[11px] text-gray-500">보낼 금액</div>
-                                            <div class="font-black text-indigo-600 text-lg">15,000,000 원</div>
-                                        </div>
-
-                                        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center space-x-2 text-emerald-800 text-xs">
-                                            <i class="fa-solid fa-circle-check text-emerald-600"></i>
-                                            <span>정상 거래 패턴으로 확인되었습니다.</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button class="w-full py-3.5 bg-indigo-600 text-white font-bold rounded-xl text-sm shadow">
-                                    송금하기
-                                </button>
-                            </div>
-
-                            <!-- STATE 2: CAUTION WARNING -->
-                            <div id="screenCaution" class="hidden h-full flex flex-col justify-between">
-                                <div>
-                                    <div class="flex items-center justify-between pb-3 border-b border-gray-200">
-                                        <span class="font-extrabold text-indigo-900 text-sm">OO뱅크</span>
-                                        <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded">안전 확인</span>
-                                    </div>
-
-                                    <div class="mt-4 text-center">
-                                        <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-2 text-xl">
-                                            <i class="fa-solid fa-triangle-exclamation"></i>
-                                        </div>
-                                        <h4 class="font-bold text-sm text-gray-900">거래 목적 재확인 요청</h4>
-                                        <p class="text-[11px] text-gray-600 mt-1">최근 이상 거래 신호가 감지되어 수취인 확인이 필요합니다.</p>
-                                    </div>
-
-                                    <div class="mt-4 space-y-2 text-xs">
-                                        <label class="flex items-center space-x-2 p-2.5 bg-gray-50 rounded-lg border">
-                                            <input type="checkbox" class="rounded text-amber-600">
-                                            <span>수취인이 친인척/아는 사람입니까?</span>
-                                        </label>
-                                        <label class="flex items-center space-x-2 p-2.5 bg-gray-50 rounded-lg border">
-                                            <input type="checkbox" class="rounded text-amber-600">
-                                            <span>수사기관의 지시를 받았습니까?</span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="space-y-2">
-                                    <button class="w-full py-3 bg-amber-500 text-white font-bold rounded-xl text-xs">
-                                        확인 후 송금 진행
-                                    </button>
-                                    <button onclick="resetSimulator()" class="w-full py-2 bg-gray-100 text-gray-700 font-bold rounded-xl text-xs">
-                                        거래 취소
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- STATE 3: HIGH RISK INTERCEPT SCREEN (Level 3 - 행동 직전 인터셉트 전용 화면) -->
-                            <div id="screenIntercept" class="hidden h-full flex flex-col justify-between bg-slate-950 text-white -m-4 p-4 rounded-[30px] border-2 border-amber-500/80 shadow-neon-cyan relative overflow-hidden">
-                                <!-- Intercept Background Dynamic Pulse Grid -->
-                                <div class="absolute inset-0 bg-[radial-gradient(#f59e0b_1px,transparent_1px)] [background-size:16px_16px] opacity-10 pointer-events-none"></div>
-                                <div class="absolute -top-10 -right-10 w-36 h-36 bg-amber-500/20 rounded-full blur-2xl pointer-events-none"></div>
-
-                                <!-- Top HUD Header -->
-                                <div class="z-10">
-                                    <div class="flex items-center justify-between border-b border-amber-500/30 pb-2">
-                                        <div class="flex items-center space-x-2">
-                                            <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
-                                            <span class="text-[10px] font-black tracking-widest text-amber-400 uppercase">AI INTERCEPT SYSTEM</span>
-                                        </div>
-                                        <span id="interceptScoreBadge" class="text-[9px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/40 font-mono font-bold">Risk 65/100</span>
-                                    </div>
-
-                                    <!-- Main Action Pause Banner -->
-                                    <div class="text-center my-3 bg-gradient-to-b from-amber-950/80 via-dark-bg to-dark-bg p-3.5 rounded-2xl border border-amber-500/40 shadow-inner">
-                                        <div class="w-13 h-13 bg-gradient-to-tr from-amber-500 to-orange-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-2.5 text-2xl shadow-lg ring-4 ring-amber-500/20 animate-pulse">
-                                            <i class="fa-solid fa-hand-paper"></i>
-                                        </div>
-                                        <h3 class="text-base font-black text-amber-300 tracking-tight">송금이 일시 중단되었습니다</h3>
-                                        <p class="text-[10px] text-gray-300 mt-1 leading-snug">
-                                            심리적 가스라이팅을 차단하기 위해<br>
-                                            <strong class="text-amber-400">의무 냉각 시간(Cooldown)</strong>이 적용 중입니다.
-                                        </p>
-                                        
-                                        <!-- Cooldown Timer Badge -->
-                                        <div class="mt-2.5 inline-flex items-center space-x-2 bg-black/80 px-3 py-1 rounded-full border border-amber-500/40">
-                                            <i class="fa-solid fa-stopwatch text-amber-400 text-xs animate-spin"></i>
-                                            <span class="text-xs font-mono font-bold text-amber-300" id="cooldownTimerText">냉각 시간: 10초 남음</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- AI Detection Evidence Cards -->
-                                    <div class="bg-dark-bg/90 p-2.5 rounded-xl border border-amber-500/20 space-y-1.5 text-[10px]">
-                                        <div class="font-bold text-amber-400 flex items-center justify-between border-b border-gray-800 pb-1">
-                                            <span><i class="fa-solid fa-shield-cat mr-1"></i>통신사 AI 실시간 분석 원인</span>
-                                            <span class="text-[8px] bg-red-500/20 text-red-400 px-1.5 py-0.2 rounded">고위험 개입</span>
-                                        </div>
-                                        <div class="space-y-1 text-gray-300">
-                                            <div class="flex items-center justify-between bg-black/40 p-1.5 rounded border border-gray-800">
-                                                <span class="flex items-center space-x-1.5">
-                                                    <i class="fa-solid fa-phone-slash text-red-400"></i>
-                                                    <span>수사기관 사칭 의심 통화 감지</span>
-                                                </span>
-                                                <span class="text-red-400 font-bold font-mono">+35</span>
-                                            </div>
-                                            <div class="flex items-center justify-between bg-black/40 p-1.5 rounded border border-gray-800">
-                                                <span class="flex items-center space-x-1.5">
-                                                    <i class="fa-solid fa-link text-amber-400"></i>
-                                                    <span>최근 피싱 미끼 URL 접속 이력</span>
-                                                </span>
-                                                <span class="text-amber-400 font-bold font-mono">+30</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Action Buttons -->
-                                <div class="z-10 space-y-1.5 mt-2">
-                                    <button id="interceptReleaseBtn" disabled onclick="simulateVerification()" class="w-full py-2.5 bg-gradient-to-r from-gray-800 to-gray-900 text-gray-400 font-extrabold rounded-xl text-xs border border-gray-700 transition-all flex items-center justify-center space-x-2 cursor-not-allowed">
-                                        <i class="fa-solid fa-fingerprint text-sm"></i>
-                                        <span id="releaseBtnText">냉각 시간 종료 후 해제 가능 (10초)</span>
-                                    </button>
-
-                                    <button onclick="simulateEmergencyContact()" class="w-full py-2 bg-gradient-to-r from-cyan-950 to-indigo-950 hover:from-cyan-900 hover:to-indigo-900 text-cyan-300 font-bold rounded-xl text-[11px] border border-cyan-500/40 transition-all flex items-center justify-center space-x-1.5 shadow-md">
-                                        <i class="fa-solid fa-user-shield text-cyan-400"></i>
-                                        <span>등록된 보호자(가족)에게 SOS 알림</span>
-                                    </button>
-
-                                    <button onclick="resetSimulator()" class="w-full py-1 text-gray-400 hover:text-white font-medium text-[10px] text-center block transition-colors">
-                                        송금 중단 및 안전하게 취소하기
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- STATE 4: CRITICAL BLOCK & 112 DISPATCH SCREEN (Level 4 - 전면차단) -->
-                            <div id="screenCritical" class="hidden h-full flex flex-col justify-between bg-slate-950 text-white -m-4 p-5 rounded-[30px] border-2 border-red-500 shadow-neon-red">
-                                <div class="text-center pt-2">
-                                    <div class="w-14 h-14 bg-red-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 text-2xl shadow-neon-red animate-pulse">
-                                        <i class="fa-solid fa-lock"></i>
-                                    </div>
-                                    <span class="bg-red-500/20 text-red-400 border border-red-500/40 text-[9px] font-black tracking-widest px-2.5 py-0.5 rounded-full uppercase">LEVEL 4: CRITICAL LOCK (강제 동결)</span>
-                                    <h3 class="text-lg font-black mt-2 text-red-500">거래 전면 차단 (앱 해제 불가)</h3>
-                                    <p class="text-[11px] text-gray-300 mt-1 leading-relaxed">
-                                        치명적 피싱(Risk 90+점) 확정! 피해 예방을 위해 <strong>본인이 눌러도 해제되지 않으며</strong> 112로 실시간 신고되었습니다.
-                                    </p>
-                                </div>
-
-                                <div class="bg-red-950/60 p-3 rounded-xl border border-red-500/40 text-xs space-y-2">
-                                    <div class="font-bold text-red-400 flex items-center justify-between">
-                                        <span>🚨 112 경찰청 & 금융사 자동 출동</span>
-                                        <span class="text-[9px] bg-red-600 px-1.5 py-0.5 rounded text-white font-bold">90~100점</span>
-                                    </div>
-                                    <div class="text-[10px] text-gray-300 space-y-1">
-                                        <p>• 사용자 자가 해제 불가능 (Hard Blocked)</p>
-                                        <p>• 112 경찰청 사이버수사대 현장 출동 요청</p>
-                                        <p>• 은행 창구 방문 확인 후 해제 가능</p>
-                                    </div>
-                                </div>
-
-                                <div class="space-y-2">
-                                    <button onclick="alert('❌ [해제 불가] 치명적 피싱 위험 상태입니다. 경찰관 또는 은행 창구 방문 확인 전까지 앱 내 해제가 원천 불가능합니다.')" class="w-full py-3 bg-red-900/60 text-red-300 font-bold rounded-xl text-xs border border-red-500/30 cursor-not-allowed">
-                                        🔒 앱 내 해제 불가 (112 출동 중)
-                                    </button>
-                                    <button onclick="resetSimulator()" class="w-full py-2 bg-gray-800 text-gray-300 font-bold rounded-xl text-[11px] hover:bg-gray-700 transition-colors">
-                                        초기화 (시연용)
-                                    </button>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- TELCO & BANK FRAUD REDUCTION ROI CALCULATOR SECTION -->
-    <section id="roi" class="py-20 bg-dark-bg border-b border-dark-border">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <span class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-bold">B2B TELCO BUSINESS IMPACT</span>
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-3 mb-4">통신사/금융사 피싱 피해 절감 ROI 계산기</h2>
-                <p class="text-gray-400">가입자 수와 이상 거래 건수를 설정해보세요.<br class="hidden sm:inline"> Phishing Brake 도입 시 연간 예방 가능한 피해액 및 브랜드 신뢰 가치를 산출합니다.</p>
-            </div>
-
-            <div class="bg-dark-card border border-dark-border rounded-2xl p-8 max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 items-center shadow-2xl">
-                <!-- Left: Sliders Inputs (7 cols) -->
-                <div class="md:col-span-7 space-y-6">
-                    <div>
-                        <div class="flex justify-between items-center text-sm font-bold text-gray-200 mb-2">
-                            <label for="subscribersRange">통신사/금융사 보유 가입자 수</label>
-                            <span id="subscribersVal" class="text-cyan-400 font-mono text-base">1,500만 명</span>
-                        </div>
-                        <input type="range" id="subscribersRange" min="100" max="3000" step="50" value="1500" oninput="calculateROI()" class="w-full accent-cyan-400 bg-dark-bg rounded-lg h-2 cursor-pointer">
-                        <div class="flex justify-between text-[10px] text-gray-500 mt-1 font-mono">
-                            <span>100만</span>
-                            <span>1,500만</span>
-                            <span>3,000만</span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="flex justify-between items-center text-sm font-bold text-gray-200 mb-2">
-                            <label for="fraudRateRange">연간 위험 노출 및 송금 시도 비율</label>
-                            <span id="fraudRateVal" class="text-amber-400 font-mono text-base">0.05%</span>
-                        </div>
-                        <input type="range" id="fraudRateRange" min="0.01" max="0.2" step="0.01" value="0.05" oninput="calculateROI()" class="w-full accent-amber-400 bg-dark-bg rounded-lg h-2 cursor-pointer">
-                        <div class="flex justify-between text-[10px] text-gray-500 mt-1 font-mono">
-                            <span>0.01% (저위험)</span>
-                            <span>0.05% (평균)</span>
-                            <span>0.2% (고위험)</span>
-                        </div>
-                    </div>
-
-                    <div class="p-4 bg-dark-bg/80 rounded-xl border border-dark-border text-xs text-gray-300 space-y-1">
-                        <div class="font-bold text-gray-200 mb-1">💡 계산 산출 산식 근거</div>
-                        <p>• 건당 평균 보이스피싱 피해액: <strong>1,850만 원</strong> (금융감독원 2025 집계 기준)</p>
-                        <p>• Phishing Brake 행동 직전 차단 성공률: <strong>약 82.4%</strong> 추정</p>
-                    </div>
-                </div>
-
-                <!-- Right: Calculated Results Card (5 cols) -->
-                <div class="md:col-span-5 bg-gradient-to-br from-emerald-950/50 via-dark-bg to-dark-bg border border-emerald-500/30 rounded-xl p-6 text-center space-y-6">
-                    <div>
-                        <div class="text-xs font-semibold text-gray-400 mb-1">연간 예상 피싱 차단 건수</div>
-                        <div id="preventedCasesVal" class="text-3xl font-black text-cyan-400 font-mono">6,180 건</div>
-                    </div>
-
-                    <div class="pt-4 border-t border-dark-border">
-                        <div class="text-xs font-semibold text-gray-400 mb-1">연간 예방 피해액 (고객 자산 보호)</div>
-                        <div id="savedAmountVal" class="text-3xl sm:text-4xl font-black text-emerald-400 font-mono">1,143 억 원</div>
-                    </div>
-
-                    <button onclick="openInquiryModal()" class="w-full py-3 rounded-xl bg-emerald-500 text-slate-950 font-extrabold text-xs shadow-neon-green hover:bg-emerald-400 transition-colors">
-                        상세 ROI 보고서 다운로드 신청
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- COMPARISON TABLE SECTION -->
-    <section id="comparison" class="py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <h2 class="text-xs font-bold uppercase tracking-widest text-indigo-400 mb-3">Comparison Matrix</h2>
-                <h3 class="text-3xl sm:text-4xl font-extrabold text-white mb-4">기존 대응 기법과의 혁신적 비교</h3>
-                <p class="text-gray-400">모두 차단하는 강경 대응이나, 아무 조치 못 하는 단순 알림 사이에서<br class="hidden sm:inline"> PHISHING BRAKE는 위험 수준 맞춤형 최적 개입을 제공합니다.</p>
-            </div>
-
-            <!-- Comparison Table Container -->
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[640px]">
-                    <thead>
-                        <tr class="border-b border-dark-border text-xs text-gray-400 uppercase tracking-wider">
-                            <th class="py-4 px-6 bg-dark-card/40 rounded-tl-xl">비교 항목</th>
-                            <th class="py-4 px-6 bg-dark-card/40">▲ 단순 경고 방식</th>
-                            <th class="py-4 px-6 bg-dark-card/40">▲ 일률적 차단 방식</th>
-                            <th class="py-4 px-6 bg-gradient-to-r from-red-950/60 to-indigo-950/60 text-cyan-400 font-black rounded-tr-xl border-t-2 border-cyan-400">
-                                ★ PHISHING BRAKE
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-dark-border text-sm">
-                        <tr class="hover:bg-dark-card/30 transition-colors">
-                            <td class="py-4 px-6 font-bold text-gray-300">개입 시점</td>
-                            <td class="py-4 px-6 text-gray-400">위험 탐지 즉시 팝업</td>
-                            <td class="py-4 px-6 text-gray-400">의심 거래 감지 즉시</td>
-                            <td class="py-4 px-6 font-bold text-cyan-400 bg-cyan-950/20">실제 행동 직전 (Judgment Moment)</td>
-                        </tr>
-                        <tr class="hover:bg-dark-card/30 transition-colors">
-                            <td class="py-4 px-6 font-bold text-gray-300">개입 강도</td>
-                            <td class="py-4 px-6 text-gray-400">약함 (경고 텍스트 알림)</td>
-                            <td class="py-4 px-6 text-gray-400">강함 (거래 즉시 정지)</td>
-                            <td class="py-4 px-6 font-bold text-cyan-400 bg-cyan-950/20">위험도(Risk Score)에 따른 단계별 차등 조절</td>
-                        </tr>
-                        <tr class="hover:bg-dark-card/30 transition-colors">
-                            <td class="py-4 px-6 font-bold text-gray-300">사용자 행동 제어</td>
-                            <td class="py-4 px-6 text-red-400">경고 무시 후 계속 진행 가능</td>
-                            <td class="py-4 px-6 text-gray-400">강제 중단 (재개 불가)</td>
-                            <td class="py-4 px-6 font-bold text-emerald-400 bg-cyan-950/20">일시 중단 후 안전 확인 시 재개 (Release)</td>
-                        </tr>
-                        <tr class="hover:bg-dark-card/30 transition-colors">
-                            <td class="py-4 px-6 font-bold text-gray-300">정상 거래 영향</td>
-                            <td class="py-4 px-6 text-gray-400">영향 없음</td>
-                            <td class="py-4 px-6 text-red-400">정상 고객 오차단 마찰 심각</td>
-                            <td class="py-4 px-6 font-bold text-emerald-400 bg-cyan-950/20">정상 거래 마찰 최소화 (Minimum Friction)</td>
-                        </tr>
-                        <tr class="hover:bg-dark-card/30 transition-colors">
-                            <td class="py-4 px-6 font-bold text-gray-300">핵심 특징 UX</td>
-                            <td class="py-4 px-6 text-gray-400">WARNING</td>
-                            <td class="py-4 px-6 text-gray-400">BLOCK</td>
-                            <td class="py-4 px-6 font-extrabold text-amber-400 bg-cyan-950/20">INTERCEPT + VERIFY</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
-
-    <!-- B2B TELCO & ECOSYSTEM INTEGRATION SECTION -->
-    <section id="telco" class="py-20 bg-dark-card/40 border-t border-dark-border">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <span class="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/30 text-xs font-bold">B2B & TELCO ECOSYSTEM</span>
-                <h2 class="text-3xl sm:text-4xl font-extrabold text-white mt-3 mb-4">통신사 중심 유기적 보안 에코시스템</h2>
-                <p class="text-gray-400">Phishing Brake는 기존 탐지 인프라를 대체하지 않습니다.<br class="hidden sm:inline">통신사, 금융 FDS, 수사기관 DB를 하나로 이어주는 최적의 <strong class="text-white">UX/서비스 레이어</strong>입니다.</p>
-            </div>
-
-            <!-- Ecosystem Architecture Diagram Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
-                <!-- Telco & Platform -->
-                <div class="bg-dark-card border border-dark-border p-6 rounded-2xl relative">
-                    <div class="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-xl font-bold mb-4">
-                        <i class="fa-solid fa-tower-cell"></i>
-                    </div>
-                    <h4 class="text-base font-bold text-white mb-2">통신사 & 플랫폼</h4>
-                    <ul class="text-xs text-gray-400 space-y-2">
-                        <li>• 실시간 이상 통화/음성 패턴 감지</li>
-                        <li>• 미끼문자 / 악성 URL 실시간 필터링</li>
-                        <li>• 발신 번호 도용 및 번호 변작 탐지</li>
-                    </ul>
-                </div>
-
-                <!-- Bank FDS -->
-                <div class="bg-dark-card border border-dark-border p-6 rounded-2xl relative">
-                    <div class="w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-xl font-bold mb-4">
-                        <i class="fa-solid fa-building-columns"></i>
-                    </div>
-                    <h4 class="text-base font-bold text-white mb-2">금융회사 FDS</h4>
-                    <ul class="text-xs text-gray-400 space-y-2">
-                        <li>• 이상 계좌 이체 시도 패턴</li>
-                        <li>• 심야/야간 고액 이체 탐지</li>
-                        <li>• 평소 비정형 금융 행동 스코어링</li>
-                    </ul>
-                </div>
-
-                <!-- Police & Govt DB -->
-                <div class="bg-dark-card border border-dark-border p-6 rounded-2xl relative">
-                    <div class="w-12 h-12 rounded-xl bg-red-500/10 text-red-400 flex items-center justify-center text-xl font-bold mb-4">
-                        <i class="fa-solid fa-shield-cat"></i>
-                    </div>
-                    <h4 class="text-base font-bold text-white mb-2">수사기관 & 공공 DB</h4>
-                    <ul class="text-xs text-gray-400 space-y-2">
-                        <li>• 피싱 의심 계좌/전화 실시간 DB</li>
-                        <li>• 112/1332 신고 연계 데이터</li>
-                        <li>• 기관 사칭 수범 리스트</li>
-                    </ul>
-                </div>
-
-                <!-- Security Tech -->
-                <div class="bg-dark-card border border-dark-border p-6 rounded-2xl relative">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl font-bold mb-4">
-                        <i class="fa-solid fa-bug"></i>
-                    </div>
-                    <h4 class="text-base font-bold text-white mb-2">보안 솔루션</h4>
-                    <ul class="text-xs text-gray-400 space-y-2">
-                        <li>• 악성 APK 및 원격앱 탐지</li>
-                        <li>• 피싱 사이트 샌드박스 검증</li>
-                        <li>• 단말기 위변조 실시간 체크</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Central Hub Banner -->
-            <div class="bg-gradient-to-r from-red-900/40 via-dark-card to-indigo-900/40 border border-indigo-500/30 rounded-2xl p-8 text-center max-w-4xl mx-auto shadow-2xl">
-                <i class="fa-solid fa-network-wired text-cyan-400 text-3xl mb-3"></i>
-                <h4 class="text-xl font-extrabold text-white mb-2">통신사 경량 SDK / Open API 서비스 레이어</h4>
-                <p class="text-sm text-gray-300 max-w-2xl mx-auto mb-6">
-                    이통사 패스(PASS) 앱, 기본 통화 앱, 뱅킹 앱에 Lightweight SDK 형태로 간편 이식하여 기존 FDS 역량과 이용자의 최종 행동(행동 직전 순간)을 즉시 연결합니다.
-                </p>
-                <button onclick="openInquiryModal()" class="px-6 py-3 rounded-xl bg-cyan-500 text-slate-900 font-extrabold text-sm hover:bg-cyan-400 transition-colors">
-                    통신사 연동 기술 규격서 요청
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- FOOTER SECTION -->
-    <footer class="bg-dark-bg border-t border-dark-border py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div class="flex items-center space-x-3">
-                    <i class="fa-solid fa-shield-halved text-red-500 text-2xl"></i>
-                    <div>
-                        <div class="font-black text-lg text-white">PHISHING BRAKE</div>
-                        <div class="text-xs text-gray-400">AI Risk Score 기반 다단계 보이스피싱 인터셉트 시스템</div>
-                    </div>
-                </div>
-
-                <div class="text-xs text-gray-400 text-center md:text-right space-y-1">
-                    <p>© 2026 PHISHING BRAKE. All rights reserved.</p>
-                    <p>본 시스템은 대국민 보이스피싱 대응 제안 기획안 및 통신사 시연용 웹페이지입니다.</p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- INQUIRY MODAL -->
-    <div id="inquiryModal" onclick="if(event.target === this) closeInquiryModal()" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="bg-dark-card border border-dark-border rounded-2xl max-w-md w-full p-6 relative shadow-2xl">
-            <button onclick="closeInquiryModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
-                <i class="fa-solid fa-xmark text-xl"></i>
-            </button>
-
-            <h3 class="text-xl font-bold text-white mb-2 flex items-center space-x-2">
-                <i class="fa-solid fa-building-circle-check text-cyan-400"></i>
-                <span>통신사 연동 문의 및 제안</span>
+          <!-- LEFT: NEWS KEYWORD ANALYSIS -->
+          <div class="card">
+            <h3>
+              뉴스 텍스트에서 반복적으로 나타난 행동 요소
             </h3>
-            <p class="text-xs text-gray-400 mb-6">
-                통신사/금융사 담당자 정보를 입력해주시면 PoC 자료 및 기술 규격서를 전송해 드립니다.
+            <p>
+              보이스피싱 관련 뉴스 4,354건을 자체 분석한 결과,
+              신뢰 형성 요소와 긴급·압박 요소,
+              실체적 행동 요소가 동일 기사 안에서 반복적으로 함께 나타났습니다.
             </p>
 
-            <form onsubmit="handleInquirySubmit(event)" class="space-y-4 text-sm">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-300 mb-1">소속 기관/통신사</label>
-                    <input type="text" required placeholder="예: SKT / KT / LGU+ / OO은행" class="w-full bg-dark-bg border border-dark-border rounded-xl p-3 text-white focus:outline-none focus:border-cyan-400">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-300 mb-1">담당자 성함 및 직급</label>
-                    <input type="text" required placeholder="홍길동 팀장" class="w-full bg-dark-bg border border-dark-border rounded-xl p-3 text-white focus:outline-none focus:border-cyan-400">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-300 mb-1">이메일 주소</label>
-                    <input type="email" required placeholder="name@company.com" class="w-full bg-dark-bg border border-dark-border rounded-xl p-3 text-white focus:outline-none focus:border-cyan-400">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-300 mb-1">문의 및 검토 내용</label>
-                    <textarea rows="3" placeholder="SDK 연동 문의, PoC 모의 시연 요청 등" class="w-full bg-dark-bg border border-dark-border rounded-xl p-3 text-white focus:outline-none focus:border-cyan-400"></textarea>
-                </div>
+            <div class="bar-group">
 
-                <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-red-600 to-indigo-600 text-white font-bold rounded-xl shadow-lg hover:shadow-neon-red transition-all">
-                    제안서 및 PoC 신청하기
-                </button>
-            </form>
+              <div class="bar-item">
+                <div class="bar-head">
+                  <span>전화·통화 (지속적 소통)</span>
+                  <span>54.9%</span>
+                </div>
+                <div class="bar-track">
+                  <div class="bar-fill bar-red" style="width: 54.9%"></div>
+                </div>
+              </div>
+
+              <div class="bar-item">
+                <div class="bar-head">
+                  <span>송금·이체 (자금 이동)</span>
+                  <span>43.8%</span>
+                </div>
+                <div class="bar-track">
+                  <div class="bar-fill bar-amber" style="width: 43.8%"></div>
+                </div>
+              </div>
+
+              <div class="bar-item">
+                <div class="bar-head">
+                  <span>개인정보·인증정보 (제어 권한)</span>
+                  <span>35.8%</span>
+                </div>
+                <div class="bar-track">
+                  <div class="bar-fill bar-indigo" style="width: 35.8%"></div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="muted" style="font-size:11px; margin-top:18px;">
+              ※ 복수 행동 유형은 중복 집계될 수 있습니다.
+              해당 수치는 실제 피해자 행동 비율이 아니라
+              보이스피싱 관련 뉴스 텍스트의 키워드 동시 등장 분석 결과입니다.
+            </div>
+          </div>
+
+          <!-- RIGHT: WARNING VS INTERRUPT -->
+          <div class="problem-box">
+            <div class="problem-title">
+              기존 대응 사이에 남는 개입 공백
+            </div>
+            <h3 style="font-size:24px; margin-bottom:13px;">
+              경고(WARNING)와
+              행동 중단(INTERRUPTION)은 다릅니다.
+            </h3>
+            <p class="muted" style="font-size:14px; line-height:1.7;">
+              경고는 위험 인지를 돕지만,
+              사용자가 경고 확인 이후에도 가스라이팅 상황에 빠져 기존 행동을 계속할 수 있습니다.
+              반대로 모든 의심 거래를 일률적으로 차단하면
+              정상적인 금융거래에도 불필요한 불편을 유발합니다.
+            </p>
+
+            <div class="comparison-mini">
+
+              <div class="mini-box">
+                <strong style="color:#fcd34d;">
+                  단순 경고 (Alerts)
+                </strong>
+                <span>
+                  위험을 알리는 데에는 도움이 되지만,
+                  심리적 압박 상태에서는 무의식적으로 '확인'을 누르고 실제 송금으로 이어질 수 있음.
+                </span>
+              </div>
+
+              <div class="mini-box">
+                <strong style="color:#fca5a5;">
+                  일률적 차단 (Block)
+                </strong>
+                <span>
+                  위험 행동을 직접 제한할 수 있지만,
+                  정상 거래의 과도한 거절로 피해를 주며 시스템 피로도를 가중시킴.
+                </span>
+              </div>
+
+            </div>
+
+            <div style="margin-top:20px; padding:12px; background:rgba(239, 68, 68, 0.1); border-radius:12px; border:1px solid rgba(239, 68, 68, 0.2); font-size:12px; color:#fca5a5;">
+              💡 <strong>해결책:</strong> 행동 직전 1초, 위험도(Risk Score) 수치에 따라 정밀하게 브레이크를 거는 <strong>다단계 인터셉트</strong>가 필요합니다.
+            </div>
+
+          </div>
+
         </div>
-    </div>
 
-    <!-- JAVASCRIPT LOGIC -->
-    <script>
-        // Mobile Menu Toggle
-        function toggleMobileMenu() {
-            const menu = document.getElementById('mobileMenu');
-            menu.classList.toggle('hidden');
-        }
+      </div>
+    </section>
 
-        // Proposal Inquiry Modal Handling Functions
-        function openInquiryModal() {
-            const modal = document.getElementById('inquiryModal');
-            if (modal) {
-                modal.classList.remove('hidden');
-                // Auto focus on the first input
-                setTimeout(() => {
-                    const firstInput = modal.querySelector('input');
-                    if (firstInput) firstInput.focus();
-                }, 100);
-            }
-        }
+    <!-- =========================================================
+         MECHANISM
+    ========================================================== -->
+    <section id="mechanism" class="section">
+      <div class="container">
 
-        function closeInquiryModal() {
-            const modal = document.getElementById('inquiryModal');
-            if (modal) {
-                modal.classList.add('hidden');
-            }
-        }
+        <div class="section-heading">
+          <div class="eyebrow">
+            CORE MECHANISM
+          </div>
+          <h2>
+            실시간 AI Risk Score 기반의 <span class="highlight-blue">다단계 개입 매커니즘</span>
+          </h2>
+          <p>
+            단일 위험 요소가 아닌 통화 상태, 제어 앱, 이체 패턴 등
+            복합 신호를 실시간 합성하여 맞춤형 브레이크를 작동시킵니다.
+          </p>
+        </div>
 
-        function handleInquirySubmit(e) {
-            e.preventDefault();
-            const modalContainer = document.querySelector('#inquiryModal > div');
-            if (modalContainer) {
-                modalContainer.innerHTML = `
-                    <div class="text-center py-6 space-y-4">
-                        <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto text-3xl border border-emerald-500/40">
-                            <i class="fa-solid fa-check"></i>
-                        </div>
-                        <h3 class="text-xl font-black text-white">신청이 완료되었습니다!</h3>
-                        <p class="text-xs text-gray-300 leading-relaxed px-2">
-                            입력하신 이메일로 <strong class="text-cyan-400">PHISHING BRAKE 통신사 연동 제안서</strong> 및 <strong class="text-emerald-400">SDK 기술 규격서</strong>가 발송됩니다.<br>
-                            담당자 확인 후 빠르게 연락드리겠습니다.
-                        </p>
-                        <button onclick="closeInquiryModal(); location.reload();" class="w-full py-3 bg-gradient-to-r from-red-600 to-indigo-600 text-white font-bold rounded-xl text-xs shadow-lg hover:shadow-neon-red transition-all">
-                            확인
-                        </button>
+        <!-- 6-STEP PIPELINE FLOW -->
+        <div class="flow-wrap">
+          <div class="flow">
+
+            <div class="flow-card">
+              <div class="flow-number">1</div>
+              <strong>다중 신호 수집</strong>
+              <span>통화 여부, 원격앱, 계좌이력, 시간대 등</span>
+            </div>
+
+            <div class="flow-card">
+              <div class="flow-number">2</div>
+              <strong>On-Device 분석</strong>
+              <span>개인정보 유출 없이 기기 내 1차 점검</span>
+            </div>
+
+            <div class="flow-card judgment">
+              <div class="flow-number">3</div>
+              <strong>AI Risk Score 산출</strong>
+              <span>0~100점 실시간 위협 지수 매핑</span>
+            </div>
+
+            <div class="flow-card">
+              <div class="flow-number">4</div>
+              <strong>행동 감지</strong>
+              <span>금융 앱 송금/인증 버튼 클릭 즉시</span>
+            </div>
+
+            <div class="flow-card">
+              <div class="flow-number">5</div>
+              <strong>차등 개입 Trigger</strong>
+              <span>주의, 강제 일시정지, 송금 차단</span>
+            </div>
+
+            <div class="flow-card">
+              <div class="flow-number">6</div>
+              <strong>피해 사전 예방</strong>
+              <span>통화 종료 유도 및 자금 안전 보호</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 4 RISK TIERS -->
+        <div class="risk-grid">
+
+          <div class="risk-card">
+            <span class="risk-tag normal-tag">Tier 1 : Normal (0~29점)</span>
+            <h4>정상 거래 (Low Risk)</h4>
+            <p>위험 신호 없음. 사용자 경험 방해 없이 송금 프로세스를 원활하게 통과시킵니다.</p>
+          </div>
+
+          <div class="risk-card">
+            <span class="risk-tag caution-tag">Tier 2 : Caution (30~59점)</span>
+            <h4>주의 경고 (Caution)</h4>
+            <p>통화 중 이체 시도 등 1차 위험 감지. 화면 상단주의 토스트 및 확인 팝업을 표시합니다.</p>
+          </div>
+
+          <div class="risk-card">
+            <span class="risk-tag high-tag">Tier 3 : High Risk (60~84점)</span>
+            <h4>강제 개입 (High Intercept)</h4>
+            <p>원격앱+통화 중 고액 이체. 10초간 송금버튼 잠금, 피싱 의심 퀴즈 통과 후 이체 진행 허용.</p>
+          </div>
+
+          <div class="risk-card">
+            <span class="risk-tag critical-tag">Tier 4 : Critical (85~100점)</span>
+            <h4>즉시 차단 (Critical Halt)</h4>
+            <p>악성 앱 감지 및 확실한 피싱 이력. 거래 즉시 중단, 보호자/지정 연락처 비상 알림 발송.</p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================
+         SIMULATOR
+    ========================================================== -->
+    <section id="simulator" class="section section-soft">
+      <div class="container">
+
+        <div class="section-heading">
+          <div class="eyebrow">
+            INTERACTIVE SIMULATOR
+          </div>
+          <h2>
+            직접 체감하는 <span class="highlight-red">PHISHING BRAKE 시뮬레이터</span>
+          </h2>
+          <p>
+            위험 신호를 선택하여 AI Risk Score의 변화를 확인하고,
+            스마트폰에서 '송금하기'를 눌러 위험 수준별 개입 화면을 테스트해보세요.
+          </p>
+        </div>
+
+        <div class="demo-note">
+          💡 <strong>테스트 방법:</strong> 왼쪽의 위험 신호 체크박스를 선택한 후, 오른쪽 모바일 화면의 [송금하기] 버튼을 눌러보세요.
+        </div>
+
+        <div class="simulator-layout">
+
+          <!-- LEFT: RISK CHECKBOX PANEL -->
+          <div class="sim-panel">
+            <h3>1. 보이스피싱 위험 신호 선택</h3>
+
+            <label class="risk-option">
+              <input type="checkbox" value="30" onchange="updateRiskScore()" id="chk1" />
+              <div>
+                <div class="risk-option-title">악성/미확인 원격 제어 앱 감지 (+30점)</div>
+                <div class="risk-option-desc">기기에 TeamViewer, AnyDesk 등 원격 제어 앱이 실행 중인 경우</div>
+              </div>
+            </label>
+
+            <label class="risk-option">
+              <input type="checkbox" value="25" onchange="updateRiskScore()" id="chk2" />
+              <div>
+                <div class="risk-option-title">출처 불분명 전화/통화 진행 중 (+25점)</div>
+                <div class="risk-option-desc">저장되지 않은 번호 또는 검찰/금융기관 사칭 의심 번호와 통화 중</div>
+              </div>
+            </label>
+
+            <label class="risk-option">
+              <input type="checkbox" value="25" onchange="updateRiskScore()" id="chk3" opacity="0.9" />
+              <div>
+                <div class="risk-option-title">최근 24시간 내 신규 입금계좌로 고액 이체 (+25점)</div>
+                <div class="risk-option-desc">거래 이력이 없는 최근 생성 계좌로 500만원 이상 송금 시도</div>
+              </div>
+            </label>
+
+            <label class="risk-option">
+              <input type="checkbox" value="10" onchange="updateRiskScore()" id="chk4" />
+              <div>
+                <div class="risk-option-title">야간/심야시간대 급송금 시도 (+10점)</div>
+                <div class="risk-option-desc">23:00 ~ 05:00 사이 정상적이지 않은 시간대의 거래 행동</div>
+              </div>
+            </label>
+
+            <label class="risk-option">
+              <input type="checkbox" value="10" onchange="updateRiskScore()" id="chk5" />
+              <div>
+                <div class="risk-option-title">신용점수 조회 및 신규 대출 실행 직후 (+10점)</div>
+                <div class="risk-option-desc">대출금 수령 후 10분 이내 타인 계좌 재이체 패턴</div>
+              </div>
+            </label>
+
+            <!-- SCORE SCORE METER -->
+            <div class="score-wrap">
+              <div class="score-head">
+                <span>실시간 AI Risk Score</span>
+                <span id="scoreText" style="color:#10b981;">0점 (Tier 1: 정상)</span>
+              </div>
+              <div class="score-track">
+                <div id="scoreBar"></div>
+              </div>
+              <div class="score-scale">
+                <span>0점 (정상)</span>
+                <span>30점 (주의)</span>
+                <span>60점 (강제개입)</span>
+                <span>85점 (차단)</span>
+                <span>100점</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT: PHONE MOCKUP -->
+          <div class="phone-area">
+            <div style="width:100%; max-width:320px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:11px; color:#94a3b8; font-weight:700;">현재 개입 단계</span>
+              <span id="phoneStageBadge" class="stage-badge step-0">STEP 0 · NORMAL</span>
+            </div>
+
+            <div class="phone">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+
+                <!-- STEP 0: NORMAL -->
+                <div id="phoneStage0" class="phone-stage active" style="background:#ffffff; color:#1e293b;">
+                  <div>
+                    <div class="phone-bank-top">
+                      <strong>모바일 뱅킹</strong>
+                      <span style="font-size:10px; color:#64748b;">보안 연결됨 🔒</span>
                     </div>
-                `;
-            }
+
+                    <div class="phone-card">
+                      <small>출금 계좌</small>
+                      <strong>내 주거래 계좌 (8391-***)</strong>
+                      <small style="margin-top:6px; color:#475569;">출금 가능 금액: 12,500,000 원</small>
+                    </div>
+
+                    <div class="phone-card" style="background:#fff; border-color:#cbd5e1;">
+                      <small>받는 사람 / 계좌</small>
+                      <strong style="font-size:13px; color:#0f172a;">김*민 (OO은행 110-***)</strong>
+                    </div>
+
+                    <div class="phone-input-box">
+                      <label>이체 금액 (원)</label>
+                      <input type="text" value="5,000,000 원" readonly />
+                    </div>
+                  </div>
+
+                  <div>
+                    <button class="phone-btn" onclick="simToast('✅ 정상 송금이 완료되었습니다. (PHISHING BRAKE 미개입)')">
+                      송금하기 (5,000,000원)
+                    </button>
+                    <div style="font-size:10px; color:#64748b; text-align:center; margin-top:6px;">PHISHING BRAKE 미개입 (정상 거래)</div>
+                  </div>
+                </div>
+
+                <!-- STEP 1: DETECT -->
+                <div id="phoneStage1" class="phone-stage" style="background:#ffffff; color:#1e293b;">
+                  <div>
+                    <div class="phone-bank-top">
+                      <strong>모바일 뱅킹</strong>
+                      <span style="font-size:10px; color:#64748b;">보안 연결됨 🔒</span>
+                    </div>
+
+                    <!-- NOTICE BANNER -->
+                    <div style="margin-top:10px; padding:10px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px; display:flex; gap:8px; align-items:flex-start;">
+                      <span style="font-size:16px;">ℹ️</span>
+                      <div>
+                        <strong style="display:block; font-size:11px; color:#1e40af;">일부 위험 신호가 감지되었습니다.</strong>
+                        <span style="font-size:10px; color:#1e3a8a; display:block; margin-top:2px; line-height:1.3;">거래 상대방과 목적을 다시 한번 확인해주세요.</span>
+                      </div>
+                    </div>
+
+                    <div class="phone-card" style="margin-top:10px;">
+                      <small>출금 계좌</small>
+                      <strong>내 주거래 계좌 (8391-***)</strong>
+                    </div>
+
+                    <div class="phone-card" style="background:#fff; border-color:#cbd5e1; margin-top:8px;">
+                      <small>받는 사람 / 계좌</small>
+                      <strong style="font-size:12px; color:#0f172a;">김*민 (OO은행 110-***)</strong>
+                    </div>
+
+                    <div class="phone-input-box" style="margin-top:8px;">
+                      <label>이체 금액</label>
+                      <input type="text" value="5,000,000 원" readonly />
+                    </div>
+                  </div>
+
+                  <div>
+                    <button class="phone-btn" style="background:#2563eb;" onclick="simToast('ℹ️ 상대방 확인 후 송금 처리가 진행됩니다.')">
+                      안전 확인 후 송금하기
+                    </button>
+                  </div>
+                </div>
+
+                <!-- STEP 2: CAUTION -->
+                <div id="phoneStage2" class="phone-stage" style="background:#f8fafc; color:#1e293b;">
+                  <div>
+                    <div class="phone-bank-top" style="border-bottom-color:#e2e8f0;">
+                      <strong style="color:#d97706;">OO뱅크 · 안전 확인</strong>
+                      <span style="font-size:10px; color:#d97706; font-weight:700;">주의 단계</span>
+                    </div>
+
+                    <div style="margin-top:12px; padding:12px; background:#fff; border:1px solid #fcd34d; border-radius:14px; box-shadow:0 4px 12px rgba(245, 158, 11, 0.08);">
+                      <div style="font-size:12px; font-weight:900; color:#92400e; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                        <span>⚠️</span> 거래 전 안전 확인이 필요합니다.
+                      </div>
+
+                      <div style="font-size:10.5px; color:#475569; display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+                        <label style="display:flex; align-items:center; gap:6px; background:#fffbeb; padding:8px; border-radius:8px; cursor:pointer;">
+                          <input type="checkbox" style="accent-color:#d97706;">
+                          <span>직접 알고 있는 사람에게 보내는 돈인가요?</span>
+                        </label>
+                        <label style="display:flex; align-items:center; gap:6px; background:#fffbeb; padding:8px; border-radius:8px; cursor:pointer;">
+                          <input type="checkbox" style="accent-color:#d97706;">
+                          <span>상대방이 기관·수사기관을 사칭하고 있지는 않나요?</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div style="margin-top:10px; font-size:10px; color:#64748b; text-align:center; line-height:1.4;">
+                      의심스러운 전화가 계속된다면 즉시 통화를 종료하십시오.
+                    </div>
+                  </div>
+
+                  <div style="display:flex; flex-direction:column; gap:6px;">
+                    <button class="phone-btn" style="background:#d97706; padding:10px;" onclick="simToast('⚠️ 안전 확인 후 다음 단계로 이동합니다.')">
+                      확인 후 계속
+                    </button>
+                    <button class="phone-btn" style="background:#64748b; padding:10px;" onclick="simToast('🛡️ 송금이 취소되었습니다.')">
+                      송금 취소
+                    </button>
+                  </div>
+                </div>
+
+                <!-- STEP 3: INTERCEPT -->
+                <div id="phoneStage3" class="phone-stage" style="background:linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%); color:#f8fafc;">
+                  <div>
+                    <div style="text-align:center; margin-top:4px;">
+                      <span style="font-size:10px; font-weight:900; color:#fdba74; background:rgba(249,115,22,0.2); padding:3px 10px; border-radius:99px; border:1px solid rgba(249,115,22,0.4);">
+                        PHISHING BRAKE INTERCEPT
+                      </span>
+                    </div>
+
+                    <div style="margin:12px auto 8px; width:52px; height:52px; border-radius:16px; background:linear-gradient(135deg, #f97316, #ea580c); display:flex; align-items:center; justify-content:center; font-size:24px; box-shadow:0 8px 20px rgba(249,115,22,0.4);">
+                      ✋
+                    </div>
+
+                    <h3 style="text-align:center; font-size:15px; color:#ffedd5; font-weight:900;">잠시 멈춰주세요.</h3>
+                    <p style="text-align:center; font-size:11px; color:#fed7aa; margin-top:2px; font-weight:700;">
+                      복수의 위험 신호가 확인되었습니다.
+                    </p>
+
+                    <div style="margin-top:10px; padding:10px; background:rgba(2,6,23,0.6); border:1px solid rgba(249,115,22,0.3); border-radius:12px; font-size:10px; color:#cbd5e1; line-height:1.4;">
+                      송금을 완료하기 전에 상대방·수취인·거래 목적을 다시 확인해주세요.
+                    </div>
+
+                    <div style="margin-top:8px; text-align:center; font-size:11px; font-weight:800; color:#fdba74;" id="stage3ScoreText">
+                      현재 Risk Score: 55점
+                    </div>
+                  </div>
+
+                  <div style="display:flex; flex-direction:column; gap:6px;">
+                    <button class="phone-btn" style="background:#f97316; padding:10px;" onclick="simToast('🔍 수취인 및 거래 목적을 재검토합니다.')">
+                      안전 여부 다시 확인
+                    </button>
+                    <button class="phone-btn" style="background:rgba(239,68,68,0.25); border:1px solid rgba(239,68,68,0.5); color:#fca5a5; padding:10px;" onclick="simToast('🛡️ 송금이 안전하게 취소되었습니다.')">
+                      송금 취소
+                    </button>
+                  </div>
+                </div>
+
+                <!-- STEP 4: VERIFY -->
+                <div id="phoneStage4" class="phone-stage" style="background:linear-gradient(180deg, #0f172a 0%, #311215 100%); color:#f8fafc;">
+                  <div>
+                    <div style="text-align:center; margin-top:4px;">
+                      <span style="font-size:10px; font-weight:900; color:#fca5a5; background:rgba(239,68,68,0.2); padding:3px 10px; border-radius:99px; border:1px solid rgba(239,68,68,0.4);">
+                        HIGH RISK VERIFICATION
+                      </span>
+                    </div>
+
+                    <h3 style="text-align:center; font-size:14px; color:#fca5a5; font-weight:900; margin-top:10px;">
+                      고위험 신호가 중첩되었습니다.
+                    </h3>
+                    <p style="text-align:center; font-size:10px; color:#cbd5e1; margin-top:2px;">
+                      거래를 잠시 중단하고 추가 확인을 진행합니다.
+                    </p>
+
+                    <div style="margin-top:10px; display:flex; flex-direction:column; gap:6px;">
+                      <div style="padding:8px 10px; background:rgba(2,6,23,0.6); border:1px solid rgba(239,68,68,0.3); border-radius:8px; font-size:10px; display:flex; align-items:center; justify-content:space-between;">
+                        <span>1. 상대방 신원 확인</span>
+                        <span style="color:#fcd34d; font-weight:800;">필수</span>
+                      </div>
+                      <div style="padding:8px 10px; background:rgba(2,6,23,0.6); border:1px solid rgba(239,68,68,0.3); border-radius:8px; font-size:10px; display:flex; align-items:center; justify-content:space-between;">
+                        <span>2. 거래 목적 재확인</span>
+                        <span style="color:#fcd34d; font-weight:800;">필수</span>
+                      </div>
+                      <div style="padding:8px 10px; background:rgba(2,6,23,0.6); border:1px solid rgba(239,68,68,0.3); border-radius:8px; font-size:10px; display:flex; align-items:center; justify-content:space-between;">
+                        <span>3. 본인 추가 인증</span>
+                        <span style="color:#fcd34d; font-weight:800;">필수</span>
+                      </div>
+                    </div>
+
+                    <div style="margin-top:8px; text-align:center; font-size:10px; font-weight:800; color:#fca5a5;" id="stage4ScoreText">
+                      현재 Risk Score: 80점
+                    </div>
+                  </div>
+
+                  <div style="display:flex; flex-direction:column; gap:6px;">
+                    <button class="phone-btn" style="background:#dc2626; padding:10px;" onclick="simToast('🔒 추가 인증 절차로 이동합니다 (개념 시연).')">
+                      추가 확인 진행
+                    </button>
+                    <button class="phone-btn" style="background:#334155; padding:10px; color:#cbd5e1;" onclick="simToast('🛡️ 거래가 안전하게 취소되었습니다.')">
+                      거래 취소
+                    </button>
+                  </div>
+                </div>
+
+                <!-- STEP 5: HOLD -->
+                <div id="phoneStage5" class="phone-stage" style="background:linear-gradient(180deg, #18080a 0%, #0f172a 100%); color:#f8fafc;">
+                  <div>
+                    <div style="text-align:center; margin-top:4px;">
+                      <span style="font-size:10px; font-weight:900; color:#e9d5ff; background:rgba(168,85,247,0.2); padding:3px 10px; border-radius:99px; border:1px solid rgba(168,85,247,0.4);">
+                        CONCEPT DEMO · STEP 5 HOLD
+                      </span>
+                    </div>
+
+                    <div style="margin:10px auto 6px; width:48px; height:48px; border-radius:14px; background:linear-gradient(135deg, #ef4444, #881337); display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow:0 8px 20px rgba(239,68,68,0.4);">
+                      🛑
+                    </div>
+
+                    <h3 style="text-align:center; font-size:14px; color:#fca5a5; font-weight:900;">
+                      고위험 거래가 일시 보류되었습니다.
+                    </h3>
+
+                    <p style="text-align:center; font-size:10px; color:#cbd5e1; margin-top:6px; line-height:1.4;">
+                      위험이 지속될 경우 거래 취소 또는 신고·공식 확인 절차와 연계할 수 있습니다.
+                    </p>
+
+                    <div style="margin-top:10px; padding:8px 10px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); border-radius:10px; font-size:9.5px; color:#fda4af; text-align:center; line-height:1.3;">
+                      💡 공모전 아이디어 개념 시연용 화면입니다.<br/>실제 자금 동결이나 자동 신고가 수행되지 않습니다.
+                    </div>
+                  </div>
+
+                  <div style="display:flex; flex-direction:column; gap:6px;">
+                    <button class="phone-btn" style="background:#dc2626; padding:10px;" onclick="simToast('🛡️ 고위험 거래가 취소되었습니다.')">
+                      거래 취소
+                    </button>
+                    <button class="phone-btn" style="background:#334155; padding:10px; color:#e2e8f0; border:1px solid rgba(148,163,184,0.3);" onclick="simToast('ℹ️ 공식 자금피해 예방 가이드 및 상담 번호(1332)를 안내합니다.')">
+                      신고·공식 확인 절차 안내
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <div style="margin-top:12px; font-size:11px; color:#64748b; text-align:center;">
+              위험 신호 개수 연동 다단계 개입 시뮬레이션
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================
+         COMPARISON TABLE
+    ========================================================== -->
+    <section id="comparison" class="section">
+      <div class="container">
+
+        <div class="section-heading">
+          <div class="eyebrow">
+            COMPARISON
+          </div>
+          <h2>
+            기존 기술과의 <span class="highlight-blue">차별성 및 우수성</span>
+          </h2>
+          <p>
+            PHISHING BRAKE는 사후 감지나 단순 통지를 넘어,
+            실제 자금 유출 직전의 '행동 스톱(Action Pause)'을 가능하게 합니다.
+          </p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>비교 항목</th>
+                <th>기존 FDS (이상금융거래탐지)</th>
+                <th>SMS/경고 알림 앱</th>
+                <th>지연이체 제도</th>
+                <th class="pb-cell">PHISHING BRAKE</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>개입 시점</td>
+                <td>거래 후 사후 분석 / 일률 차단</td>
+                <td>통화/문자 수신 시점</td>
+                <td>송금 후 3시간 지연</td>
+                <td class="pb-cell">송금 버튼 클릭 즉시 (행동 직전)</td>
+              </tr>
+              <tr>
+                <td>개입 방식</td>
+                <td>계좌 동결 또는 묵시적 거절</td>
+                <td>화면 알림 팝업 (경고만)</td>
+                <td>단순 시간 유예</td>
+                <td class="pb-cell">AI Risk Score 연동 다단계 차등 개입</td>
+              </tr>
+              <tr>
+                <td>가스라이팅 억제력</td>
+                <td>낮음 (사용자가 사기 인지 못함)</td>
+                <td>보통 (경고 무시 후 송금 가능)</td>
+                <td>보통 (지연 해제 대기시 유효)</td>
+                <td class="pb-cell">매우 높음 (10초 강제 정지 + 확인 퀴즈)</td>
+              </tr>
+              <tr>
+                <td>정상 거래 불편도</td>
+                <td>높음 (오탐 시 계좌 차단)</td>
+                <td>낮음</td>
+                <td>높음 (급한 정상 이체 지연)</td>
+                <td class="pb-cell">최소화 (위험점수 30점 미만 무개입)</td>
+              </tr>
+              <tr>
+                <td>실시간 신호 합성</td>
+                <td>금융 데이터 위주</td>
+                <td>통화/문자 데이터 위주</td>
+                <td>없음 (시간 기준)</td>
+                <td class="pb-cell">기기 온디바이스 + 통화 + 금융 복합 합성</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================
+         EFFECTS
+    ========================================================== -->
+    <section id="effects" class="section section-soft">
+      <div class="container">
+
+        <div class="section-heading">
+          <div class="eyebrow">
+            EXPECTED IMPACT
+          </div>
+          <h2>
+            시스템 도입 시 <span class="highlight-green">기대 효과</span>
+          </h2>
+          <p>
+            피해자의 자금 유출을 방지함과 동시에 사회적 금융 인프라의 신뢰를 제고합니다.
+          </p>
+        </div>
+
+        <div class="cards-3">
+
+          <div class="card">
+            <div class="effect-number">01</div>
+            <h3>피해 골든타임 사수</h3>
+            <p>
+              보이스피싱 범죄자가 송금을 유도하는 마지막 1초에 브레이크를 걸어 실질적인 자금 유출 피해를 0으로 수렴시킵니다.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="effect-number">02</div>
+            <h3>심리적 가스라이팅 해제</h3>
+            <p>
+              10초 간의 강제 일시정지 및 상황 확인 질문을 통해 범죄자의 압박 통화로부터 사용자의 이성적 판단력을 환원합니다.
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="effect-number">03</div>
+            <h3>금융 피로도 최소화</h3>
+            <p>
+              위험하지 않은 95% 이상의 정상 거래에는 개입하지 않는 스마트 차등 알고리즘으로 서비스 만족도를 보존합니다.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================
+         APPLICATION STRUCTURE
+    ========================================================== -->
+    <section id="application" class="section">
+      <div class="container">
+
+        <div class="section-heading">
+          <div class="eyebrow">
+            ARCHITECTURE
+          </div>
+          <h2>
+            시스템 <span class="highlight-blue">적용 구조</span>
+          </h2>
+          <p>
+            통신사, OS, 금융사 FDS가 유기적으로 연동되는 확장형 개입 체계
+          </p>
+        </div>
+
+        <div class="structure">
+
+          <div class="structure-box">
+            <strong style="color:#67e8f9;">[Layer 1] 통화 / OS API</strong>
+            <span>통화 상태 감지, 원격앱 모니터링, 악성 URL 검출 (On-Device)</span>
+          </div>
+
+          <div class="structure-box structure-center">
+            <strong style="color:#fb7185;">[Layer 2] AI Risk Engine</strong>
+            <span>실시간 위협 요소 가중치 산출 및 4단계 위험 등급 매핑</span>
+          </div>
+
+          <div class="structure-box">
+            <strong style="color:#6ee7b7;">[Layer 3] 은행 FDS 연동</strong>
+            <span>이체 계좌 위험도 연동 및 금융 모바일 앱 내 UI 개입</span>
+          </div>
+
+          <div class="structure-box">
+            <strong style="color:#fcd34d;">[Layer 4] 비상 에스컬레이션</strong>
+            <span>보호자 알림, 통신사 비상 차단 및 경찰 연계 모듈</span>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================
+         FINAL MESSAGE
+    ========================================================== -->
+    <section class="section">
+      <div class="container">
+
+        <div class="final-message">
+          <h2>
+            안전한 금융 세상을 만드는<br />
+            <span class="hero-gradient">마지막 1초의 브레이크</span>
+          </h2>
+          <p style="margin-bottom:28px;">
+            보이스피싱은 더 이상 개인의 주의력 문제에만 맡길 수 없습니다.
+            <strong>PHISHING BRAKE</strong>는 기술의 힘으로 사용자의 실수를 행동 직전에 감싸주는 든든한 울타리가 될 것입니다.
+          </p>
+          <a href="#simulator" class="primary-btn">
+            시뮬레이터 다시 테스트하기
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-inner">
+        <div>
+          <strong>PHISHING BRAKE Project</strong> — AI Risk Score 기반 다단계 보이스피싱 인터셉트 시스템
+        </div>
+        <div>
+          © 2026 PHISHING BRAKE. All rights reserved.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- =========================================================
+       JAVASCRIPT LOGIC
+  ========================================================== -->
+  <script>
+    // 1. MOBILE MENU TOGGLE
+    function toggleMobileMenu() {
+      const menu = document.getElementById("mobileMenu");
+      menu.classList.toggle("open");
+    }
+
+    // 2. RISK SCORE & STAGE CONTROL LOGIC
+    let currentScore = 0;
+
+    function updateRiskScore() {
+      let score = 0;
+      let checkedCount = 0;
+
+      if (document.getElementById("chk1").checked) { score += 30; checkedCount++; }
+      if (document.getElementById("chk2").checked) { score += 25; checkedCount++; }
+      if (document.getElementById("chk3").checked) { score += 25; checkedCount++; }
+      if (document.getElementById("chk4").checked) { score += 10; checkedCount++; }
+      if (document.getElementById("chk5").checked) { score += 10; checkedCount++; }
+
+      currentScore = Math.min(score, 100);
+
+      const scoreBar = document.getElementById("scoreBar");
+      const scoreText = document.getElementById("scoreText");
+
+      scoreBar.style.width = currentScore + "%";
+
+      if (currentScore < 30) {
+        scoreBar.style.backgroundColor = "#10b981"; // Normal Green
+        scoreText.style.color = "#10b981";
+        scoreText.innerText = currentScore + "점 (Tier 1: 정상)";
+      } else if (currentScore < 60) {
+        scoreBar.style.backgroundColor = "#f59e0b"; // Caution Amber
+        scoreText.style.color = "#f59e0b";
+        scoreText.innerText = currentScore + "점 (Tier 2: 주의)";
+      } else if (currentScore < 85) {
+        scoreBar.style.backgroundColor = "#f97316"; // High Orange
+        scoreText.style.color = "#f97316";
+        scoreText.innerText = currentScore + "점 (Tier 3: 강제 개입)";
+      } else {
+        scoreBar.style.backgroundColor = "#ef4444"; // Critical Red
+        scoreText.style.color = "#ef4444";
+        scoreText.innerText = currentScore + "점 (Tier 4: 즉시 차단)";
+      }
+
+      // Update 6-stage phone view based on checked count (0 to 5)
+      updatePhoneStage(checkedCount, currentScore);
+    }
+
+    function updatePhoneStage(count, score) {
+      const badge = document.getElementById("phoneStageBadge");
+      
+      // Hide all stages
+      for (let i = 0; i <= 5; i++) {
+        const stageEl = document.getElementById("phoneStage" + i);
+        if (stageEl) {
+          stageEl.classList.remove("active");
         }
+      }
 
-        // Close modal on ESC key press
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeInquiryModal();
-            }
-        });
+      // Dynamic text updates for stages with scores
+      const s3 = document.getElementById("stage3ScoreText");
+      if (s3) s3.innerText = `현재 Risk Score: ${score}점`;
 
-        let cooldownTimer = null;
-        let cooldownSeconds = 10;
+      const s4 = document.getElementById("stage4ScoreText");
+      if (s4) s4.innerText = `현재 Risk Score: ${score}점`;
 
-        function startInterceptCooldown() {
-            if (cooldownTimer) clearInterval(cooldownTimer);
-            cooldownSeconds = 10;
-            
-            const timerText = document.getElementById('cooldownTimerText');
-            const releaseBtn = document.getElementById('interceptReleaseBtn');
-            const releaseBtnText = document.getElementById('releaseBtnText');
+      // Activate active stage based on checked count
+      const activeStage = document.getElementById("phoneStage" + count);
+      if (activeStage) {
+        activeStage.classList.add("active");
+      }
 
-            if (releaseBtn) {
-                releaseBtn.disabled = true;
-                releaseBtn.className = "w-full py-2.5 bg-gradient-to-r from-gray-800 to-gray-900 text-gray-400 font-extrabold rounded-xl text-xs border border-gray-700 transition-all flex items-center justify-center space-x-2 cursor-not-allowed";
-            }
-
-            cooldownTimer = setInterval(() => {
-                cooldownSeconds--;
-                if (timerText) timerText.innerText = `냉각 시간: ${cooldownSeconds}초 남음`;
-                if (releaseBtnText) releaseBtnText.innerText = `냉각 시간 종료 후 해제 가능 (${cooldownSeconds}초)`;
-
-                if (cooldownSeconds <= 0) {
-                    clearInterval(cooldownTimer);
-                    cooldownTimer = null;
-                    if (timerText) timerText.innerText = "냉각 시간 완료 (해제 가능)";
-                    if (releaseBtnText) releaseBtnText.innerText = "🔓 본인 생체인증(Face ID)으로 차단 해제";
-                    if (releaseBtn) {
-                        releaseBtn.disabled = false;
-                        releaseBtn.className = "w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black rounded-xl text-xs shadow-lg hover:brightness-110 transition-all flex items-center justify-center space-x-2 cursor-pointer animate-pulse";
-                    }
-                }
-            }, 1000);
+      // Update top badge info
+      if (badge) {
+        badge.className = "stage-badge step-" + count;
+        switch (count) {
+          case 0:
+            badge.innerText = "STEP 0 · NORMAL";
+            break;
+          case 1:
+            badge.innerText = "STEP 1 · DETECT";
+            break;
+          case 2:
+            badge.innerText = "STEP 2 · CAUTION";
+            break;
+          case 3:
+            badge.innerText = "STEP 3 · INTERCEPT";
+            break;
+          case 4:
+            badge.innerText = "STEP 4 · VERIFY";
+            break;
+          case 5:
+            badge.innerText = "STEP 5 · HOLD";
+            break;
         }
+      }
+    }
 
-        // Direct Quick Level Switcher for Demonstrations
-        function setDirectLevel(lvl) {
-            document.getElementById('risk1').checked = (lvl === 2 || lvl === 4);
-            document.getElementById('risk2').checked = (lvl >= 3);
-            document.getElementById('risk3').checked = (lvl >= 3);
-            document.getElementById('risk4').checked = (lvl >= 4);
-            updateSimulator();
-        }
+    // Interactive Toast Notification for Simulator Actions
+    function simToast(msg) {
+      const toast = document.createElement("div");
+      toast.style.cssText = `
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #0f172a;
+        color: #f8fafc;
+        border: 1px solid #38bdf8;
+        padding: 12px 20px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        z-index: 1000;
+        font-size: 12px;
+        font-weight: 800;
+        animation: fadeIn 0.3s ease;
+      `;
+      toast.innerText = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
 
-        // Simulator Interactive Engine
-        function updateSimulator() {
-            let baseScore = 10;
-            
-            const r1 = document.getElementById('risk1').checked ? 35 : 0;
-            const r2 = document.getElementById('risk2').checked ? 25 : 0;
-            const r3 = document.getElementById('risk3').checked ? 30 : 0;
-            const r4 = document.getElementById('risk4').checked ? 20 : 0;
-
-            const totalScore = baseScore + r1 + r2 + r3 + r4;
-
-            // UI Elements
-            const scoreText = document.getElementById('scoreText');
-            const scoreBar = document.getElementById('scoreBar');
-
-            const screenNormal = document.getElementById('screenNormal');
-            const screenCaution = document.getElementById('screenCaution');
-            const screenIntercept = document.getElementById('screenIntercept');
-            const screenCritical = document.getElementById('screenCritical');
-
-            // Bar update
-            scoreBar.style.width = totalScore + '%';
-
-            // Hide all screen states first
-            screenNormal.classList.add('hidden');
-            screenCaution.classList.add('hidden');
-            screenIntercept.classList.add('hidden');
-            screenCritical.classList.add('hidden');
-
-            if (cooldownTimer) {
-                clearInterval(cooldownTimer);
-                cooldownTimer = null;
-            }
-
-            // State changes based on 4-Level Score Thresholds
-            if (totalScore < 30) {
-                scoreText.innerText = totalScore + ' / 100 점 (안전 - NORMAL)';
-                scoreText.className = 'text-2xl font-black text-emerald-400';
-                scoreBar.className = 'bg-emerald-500 h-full rounded-full transition-all duration-500';
-                screenNormal.classList.remove('hidden');
-            } 
-            else if (totalScore >= 30 && totalScore < 60) {
-                scoreText.innerText = totalScore + ' / 100 점 (주의 - CAUTION)';
-                scoreText.className = 'text-2xl font-black text-amber-400';
-                scoreBar.className = 'bg-amber-500 h-full rounded-full transition-all duration-500';
-                screenCaution.classList.remove('hidden');
-            } 
-            else if (totalScore >= 60 && totalScore < 90) {
-                scoreText.innerText = totalScore + ' / 100 점 (고위험 - 행동중단 INTERCEPT)';
-                scoreText.className = 'text-2xl font-black text-orange-400 animate-pulse';
-                scoreBar.className = 'bg-orange-500 h-full rounded-full transition-all duration-500';
-                
-                const scoreBadge = document.getElementById('interceptScoreBadge');
-                if (scoreBadge) scoreBadge.innerText = `Risk ${totalScore}/100`;
-
-                screenIntercept.classList.remove('hidden');
-                startInterceptCooldown();
-            }
-            else {
-                scoreText.innerText = totalScore + ' / 100 점 (CRITICAL - 강제 차단 & 112 신고)';
-                scoreText.className = 'text-2xl font-black text-red-500 animate-pulse';
-                scoreBar.className = 'bg-red-600 h-full rounded-full transition-all duration-500';
-                screenCritical.classList.remove('hidden');
-            }
-        }
-
-        function resetSimulator() {
-            document.getElementById('risk1').checked = false;
-            document.getElementById('risk2').checked = false;
-            document.getElementById('risk3').checked = false;
-            document.getElementById('risk4').checked = false;
-            updateSimulator();
-        }
-
-        function simulateVerification() {
-            alert('안전 검증 프로세스가 시작되었습니다. 2차 안면 인식 및 생체 인증 후 거래가 재개(Release)됩니다.');
-            resetSimulator();
-        }
-
-        // Voice AI Simulation Script
-        let voiceInterval = null;
-        const voiceScript = [
-            { time: "00:01", text: "[수신] 발신번호: 010-****-8291 (미등록 번호)", risk: 5 },
-            { time: "00:03", text: "상대방: '여보세요, 서울중앙지검 첨단범죄수사부 김민수 검사입니다.'", risk: 20 },
-            { time: "00:06", text: "상대방: '선생님 명의의 계좌가 금융사기 범죄에 도용되었습니다.'", risk: 40 },
-            { time: "00:09", text: "상대방: '지금 즉시 전달드린 링크로 원격제어 앱을 설치하세요.'", risk: 75 },
-            { time: "00:12", text: "상대방: '자산 보호 조치를 위해 금융감독원 안전계좌로 송금하세요.'", risk: 95 }
-        ];
-
-        function toggleVoiceAudioSim() {
-            const box = document.getElementById('voiceStreamBox');
-            const btn = document.getElementById('voiceSimBtn');
-            const transcript = document.getElementById('voiceTranscript');
-            const timer = document.getElementById('voiceSimStatus');
-
-            if (voiceInterval) {
-                clearInterval(voiceInterval);
-                voiceInterval = null;
-                box.classList.add('hidden');
-                btn.classList.remove('bg-red-600', 'text-white');
-                return;
-            }
-
-            box.classList.remove('hidden');
-            btn.classList.add('bg-red-600', 'text-white');
-            transcript.innerHTML = '';
-
-            let step = 0;
-            document.getElementById('risk1').checked = true;
-            updateSimulator();
-
-            voiceInterval = setInterval(() => {
-                if (step >= voiceScript.length) {
-                    clearInterval(voiceInterval);
-                    voiceInterval = null;
-                    return;
-                }
-
-                const line = voiceScript[step];
-                timer.innerText = line.time;
-
-                const p = document.createElement('p');
-                p.className = line.risk > 50 ? 'text-red-400 font-bold animate-pulse' : 'text-gray-300';
-                p.innerText = `[${line.time}] ${line.text}`;
-                transcript.appendChild(p);
-                transcript.scrollTop = transcript.scrollHeight;
-
-                if (step === 2) document.getElementById('risk2').checked = true;
-                if (step === 3) document.getElementById('risk3').checked = true;
-                if (step === 4) document.getElementById('risk4').checked = true;
-                
-                updateSimulator();
-                step++;
-            }, 2000);
-        }
-
-        // Emergency SOS Alert Simulation
-        function simulateEmergencyContact() {
-            alert('🚨 [긴급 보호자 알림 발송 완료]\n\n등록된 보호자(가족) 스마트폰으로 위급 상황 사이렌 알림 및 현재 위치/기관 사칭 통화 위협 리포트가 즉시 전달되었습니다.');
-        }
-
-        // ROI Calculator Logic
-        function calculateROI() {
-            const subsRange = document.getElementById('subscribersRange').value; // 만 명
-            const rateRange = document.getElementById('fraudRateRange').value; // %
-
-            document.getElementById('subscribersVal').innerText = Number(subsRange).toLocaleString() + '만 명';
-            document.getElementById('fraudRateVal').innerText = rateRange + '%';
-
-            // Calculations
-            const totalSubs = subsRange * 10000;
-            const rate = rateRange / 100;
-            const expectedCases = Math.round(totalSubs * rate);
-            const preventedCases = Math.round(expectedCases * 0.824); // 82.4% prevention rate
-
-            const avgLossPerCase = 18500000; // 1,850만원
-            const totalSavedKrw = preventedCases * avgLossPerCase;
-            const totalSavedEok = Math.round(totalSavedKrw / 100000000);
-
-            document.getElementById('preventedCasesVal').innerText = preventedCases.toLocaleString() + ' 건';
-            document.getElementById('savedAmountVal').innerText = totalSavedEok.toLocaleString() + ' 억 원';
-        }
-
-        // Initialize ROI on load
-        window.addEventListener('DOMContentLoaded', () => {
-            calculateROI();
-        });
-    </script>
+    // Initialize initial state
+    window.onload = function() {
+      updateRiskScore();
+    };
+  </script>
 </body>
 </html>
